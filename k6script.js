@@ -1,19 +1,19 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner } from './k6/scenarioRunner.js';
+import { ScenariosRunner, SCENARIO, HOST, TEST_TAG, teardownToBeExported } from './k6/scenarioRunner.js';
 
 const CHECKOUT_SCENARIO = SCENARIO + "_checkout"; //app_checkout, zk_checkout
 
 const scenarioRunner = new ScenariosRunner();
-scenarioRunner.registerScenarioProvider(() => {
-    return {
-        name: CHECKOUT_SCENARIO,
+const scenarioProvider = () => {
+  return {
         executor: 'ramping-arrival-rate',
         exec: 'checkout',
         startRate: 1,
         startTime: '0s'
     };
-});
+}
+scenarioRunner.registerScenarioProvider(CHECKOUT_SCENARIO, scenarioProvider);
 
 //k6 const to be exported
 export const options = {
@@ -46,22 +46,10 @@ export function checkout() {
     }
   }
   const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
-  scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res.timings[metric]);
+  scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res);
   sleep(.5);
 }
 
-//k6 function to be exported
-export function teardown(data) {
-  // 4. teardown code
-  //SERVICE
-  console.log('Tearing down test started for ' + SERVICE);
-  options.scenarios.forEach((scenario) => {
-    scenarioRunner.addTrendMetric(scenario.name, 0);
-  });
-  const res = http.get('http://demo-load-generator.getanton.com/mark-closed/' + SERVICE, {
-    tags: {
-      run_id: TEST_TAG,
-    },
-  });
-  console.log(res);
+export function teardown(data){
+  teardownToBeExported(data)
 }

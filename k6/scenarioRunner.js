@@ -29,10 +29,13 @@ export class ScenariosRunner{
         this.myGauge = new Gauge('concurrency');
         this.scenarioMetrics = ['waiting', 'duration']
         this.scenarioProviders = []
+        this.scenarioNames = []
     }
 
-    registerScenarioProvider(scenarioProvider){
+    registerScenarioProvider(scenarioName, scenarioProvider){
+        console.log("registering scenario provider ", scenarioName);
         this.scenarioProviders.push(scenarioProvider);
+        this.scenarioNames.push(scenarioName);
     }
 
     parseStages() {
@@ -74,20 +77,22 @@ export class ScenariosRunner{
     createScenarios() {
         this.parseStages();
         const scenariosMap = {};
-
         //loop over scenario providers
+        var index = 0;
         this.scenarioProviders.forEach((scenarioProvider) => {
-            scenario = scenarioProvider()
+            console.log("looping scenario provider - ", scenarioProvider);
+            var scenario = scenarioProvider()
             scenario.stages = this.scenarioStage;
             scenario.preAllocatedVUs = this.initialVUs;
             scenario.maxVUs = this.maxVUs;
             scenario.timeUnit = this.timeUnit;
-            var key = scenario.name;
+            var key = this.scenarioNames[index];
             this.scenarioMetrics.forEach((metric) => {
                 this.myTrend[key] = this.myTrend[key] || {};
                 this.myTrend[key][metric] = new Trend(`custom_${metric}`);
             })
             scenariosMap[key] = scenario;
+            index++;
         })
 
         return scenariosMap;
@@ -101,9 +106,10 @@ export class ScenariosRunner{
         return stageIndex;
     }
 
-    addTrendMetric(scenarioName, metricTiming){
+    addTrendMetric(scenarioName, res){
         this.scenarioMetrics.forEach((metric) => {
-            this.myTrend[scenarioName][metric].add(metricTiming, { run_id: TEST_TAG });
+            var timing = res ? res.timings[metric] : 0
+            this.myTrend[scenarioName][metric].add(timing, { run_id: TEST_TAG });
         })
     }
 }
@@ -157,17 +163,17 @@ export class ScenariosRunner{
 // }
 
 // //k6 function to be exported
-// export function teardown(data) {
-//   // 4. teardown code
-//   //SERVICE
-//   console.log('Tearing down test started for ' + SERVICE);
-//   options.scenarios.forEach((scenario) => {
-//     scenarioRunner.addTrendMetric(scenario.name, 0);
-//   });
-//   const res = http.get('http://demo-load-generator.getanton.com/mark-closed/' + SERVICE, {
-//     tags: {
-//       run_id: TEST_TAG,
-//     },
-//   });
-//   console.log(res);
-// }
+export function teardownToBeExported(data) {
+  // 4. teardown code
+  //SERVICE
+  console.log('Tearing down test started for ' + SERVICE);
+  options.scenarioNames.forEach((scenarioName) => {
+    scenarioRunner.addTrendMetric(scenarioName);
+  });
+  const res = http.get('http://demo-load-generator.getanton.com/mark-closed/' + SERVICE, {
+    tags: {
+      run_id: TEST_TAG,
+    },
+  });
+  console.log(res);
+}
