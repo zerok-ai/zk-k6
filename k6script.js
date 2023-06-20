@@ -1,6 +1,6 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner } from './k6/scenarioRunner';
+import { ScenariosRunner } from './k6/scenarioRunner.js';
 
 const CHECKOUT_SCENARIO = SCENARIO + "_checkout"; //app_checkout, zk_checkout
 
