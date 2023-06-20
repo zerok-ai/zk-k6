@@ -33,7 +33,6 @@ export class ScenariosRunner{
     }
 
     registerScenarioProvider(scenarioName, scenarioProvider){
-        console.log("registering scenario provider ", scenarioName);
         this.scenarioProviders.push(scenarioProvider);
         this.scenarioNames.push(scenarioName);
     }
@@ -80,8 +79,8 @@ export class ScenariosRunner{
         //loop over scenario providers
         var index = 0;
         this.scenarioProviders.forEach((scenarioProvider) => {
-            console.log("looping scenario provider - ", scenarioProvider);
             var scenario = scenarioProvider()
+            console.log("looping scenario provider - ", scenario);
             scenario.stages = this.scenarioStage;
             scenario.preAllocatedVUs = this.initialVUs;
             scenario.maxVUs = this.maxVUs;
@@ -163,11 +162,11 @@ export class ScenariosRunner{
 // }
 
 // //k6 function to be exported
-export function teardownToBeExported(data) {
+export function teardownToBeExported(scenarioRunner) {
   // 4. teardown code
   //SERVICE
   console.log('Tearing down test started for ' + SERVICE);
-  options.scenarioNames.forEach((scenarioName) => {
+  scenarioRunner.scenarioNames.forEach((scenarioName) => {
     scenarioRunner.addTrendMetric(scenarioName);
   });
   const res = http.get('http://demo-load-generator.getanton.com/mark-closed/' + SERVICE, {

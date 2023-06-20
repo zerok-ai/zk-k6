@@ -45,11 +45,17 @@ export function checkout() {
       'rate-limit': scenarioRunner.stageToRateLimit[stageIndex + '']
     }
   }
-  const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
+  // const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
+  var url = 'http://' + HOST + '/api/inventory/all';
+  // const res = http.get(url, params);
+  const res = http.get('http://minikube.localhost/api/inventory/all', params);
+  console.log('res.body  ', url, '  ', res.status, ' ')
   scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res);
   sleep(.5);
 }
 
 export function teardown(data){
-  teardownToBeExported(data)
+  teardownToBeExported(scenarioRunner)
 }
+
+// checkout();
