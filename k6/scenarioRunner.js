@@ -3,18 +3,18 @@ import { sleep } from 'k6';
 import http from 'k6/http';
 import { Gauge, Trend } from 'k6/metrics';
 
-const INITIAL_VUS = (__ENV.INITIAL_VUS) ? __ENV.INITIAL_VUS : 1000;
-const MAX_VUS = (__ENV.MAX_VUS) ? __ENV.MAX_VUS : 1000;
-const PROMETHEUS_REMOTE_URL = __ENV.PROMETHEUS_REMOTE_URL;
-const RATE = __ENV.RATE;
-const STAGES = __ENV.STAGES;
-const DURATION = __ENV.DURATION;
-const TIMEUNIT = __ENV.TIMEUNIT;
-const SERVICE = __ENV.SERVICE;
-const SCENARIO = (__ENV.SCENARIO) ? __ENV.SCENARIO : __ENV.SERVICE;
-const CONCURRENCY = __ENV.CONCURRENCY;
-const TEST_TAG = __ENV.TEST_TAG;
-const HOST = __ENV.HOST;
+export const INITIAL_VUS = (__ENV.INITIAL_VUS) ? __ENV.INITIAL_VUS : 1000;
+export const MAX_VUS = (__ENV.MAX_VUS) ? __ENV.MAX_VUS : 1000;
+export const PROMETHEUS_REMOTE_URL = __ENV.PROMETHEUS_REMOTE_URL;
+export const RATE = __ENV.RATE;
+export const STAGES = __ENV.STAGES;
+export const DURATION = __ENV.DURATION;
+export const TIMEUNIT = __ENV.TIMEUNIT;
+export const SERVICE = __ENV.SERVICE;
+export const SCENARIO = (__ENV.SCENARIO) ? __ENV.SCENARIO : __ENV.SERVICE;
+export const CONCURRENCY = __ENV.CONCURRENCY;
+export const TEST_TAG = __ENV.TEST_TAG;
+export const HOST = __ENV.HOST;
 
 export class ScenariosRunner{
     constructor(){
