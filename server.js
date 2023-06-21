@@ -138,17 +138,17 @@ app.post('/start/:service', upload.single('file'), (req, res) => {
     const testTag = (queryParams.tag) ? queryParams.tag : "none";
     const k6ScriptFilePath = absolutePath;
     console.log('k6ScriptFilePath=', k6ScriptFilePath);
-    runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
-        fs.unlink(k6ScriptFilePath, (err) => {
-            if (err) {
-                console.error(err);
-                return;
-            }
+    // runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
+    //     // fs.unlink(k6ScriptFilePath, (err) => {
+    //     //     if (err) {
+    //     //         console.error(err);
+    //     //         return;
+    //     //     }
 
-            console.log('File deleted successfully');
-        });
-        res.send(data);
-    });
+    //     //     console.log('File deleted successfully');
+    //     // });
+    //     res.send(data);
+    // });
 })
 
 app.get('/pause', (req, res) => {
