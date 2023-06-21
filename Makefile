@@ -7,7 +7,7 @@ deploy:
 bdeploy:
 	./scripts/gcp-artifact-deploy.sh && ./scripts/deploy.sh
 
-restart
+restart:
 	kubectl delete pods -l app=k6-load-generator -n k6
 
 brestart:

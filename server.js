@@ -251,9 +251,9 @@ async function startK6(params) {
         let date=new Date(Date.now());
         var dateString = date.getUTCFullYear() +"/"+ (date.getUTCMonth()+1) +"/"+ date.getUTCDate() + " " + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
 
+        // k6 run --no-connection-reuse -o json -e CONCURRENCY="${concurrency}" \
         let command = `ulimit -n 65536;
         K6_PROMETHEUS_REMOTE_URL="${PROM_URL}" \
-        // k6 run --no-connection-reuse -o json -e CONCURRENCY="${concurrency}" \
         ./k6/k6 run --no-connection-reuse -o output-prometheus-remote -e CONCURRENCY="${concurrency}" \
         -e SERVICE="${service}" -e TIMEUNIT="${timeunit}" -e DURATION="${duration}" -e STAGES="${stages}" \
         -e RATE=${rate} -e PROMETHEUS_REMOTE_URL="${PROM_URL}" -e INITIAL_VUS="${initialVUs}" \
