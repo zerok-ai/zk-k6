@@ -47,9 +47,8 @@ export function checkout() {
   }
   // const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
   var url = 'http://' + HOST + '/api/inventory/all';
-  // const res = http.get(url, params);
-  const res = http.get('http://minikube.localhost/api/inventory/all', params);
-  console.log('res.body  ', url, '  ', res.status, ' ')
+  const res = http.get(url, params);
+  // console.log('res.body  ', url, '  ', res.status, ' ')
   scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res);
   sleep(.5);
 }
