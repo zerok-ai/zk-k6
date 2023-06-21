@@ -3,12 +3,25 @@ const pkill = require('pkill');
 const fs = require('fs');
 const { PROM_URL, APP_PORT } = require('./configs/resolver');
 const app = express()
-const multer = require('multer');
 const path = require('path');
-const upload = multer({ dest: 'uploads/' });
 const { ServiceManager } = require("./configs/serviceManager");
 const execute = require('child_process').exec
 const serviceManager = new ServiceManager();
+const multer = require('multer');
+const FILE_PREFIX = 'DELETELATER-';
+const storage = multer.diskStorage({
+    destination: './',
+    filename: function (req, file, callback) {
+        // Generate a custom filename
+        const uniquePrefix = FILE_PREFIX;
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+        const fileExtension = path.extname(file.originalname);
+        const fileName = uniquePrefix + file.fieldname + '-' + uniqueSuffix + fileExtension;
+        callback(null, fileName);
+    }
+});
+const upload = multer({ storage });
+// const upload = multer({ dest: './' });
 var running = false;
 var paused = false;
 
@@ -105,6 +118,18 @@ function runTestForService(params, callback) {
 }
 
 //app, zk, zk-spill, zk-soak
+app.get('/delete/temps', (req, res) => {
+    //delete all files with prefix FILE_PREFIX
+    fs.readdir('./', (err, files) => {
+        files.forEach(file => {
+            if (file.startsWith(FILE_PREFIX)) {
+                fs.unlinkSync(file);
+            }
+        });
+        res.send('deleted');
+    });
+});
+
 app.get('/start/:service', (req, res) => {
     const service = req.params.service;
     const queryParams = req.query;
@@ -123,6 +148,13 @@ app.get('/start/:service', (req, res) => {
     });
 })
 
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    const file = req.file;
+    const absolutePath = path.resolve(file.path);
+    res.send('File uploaded at ' + absolutePath);
+})
+
 app.post('/start/:service', upload.single('file'), (req, res) => {
     const file = req.file;
     const absolutePath = path.resolve(file.path);
@@ -138,17 +170,9 @@ app.post('/start/:service', upload.single('file'), (req, res) => {
     const testTag = (queryParams.tag) ? queryParams.tag : "none";
     const k6ScriptFilePath = absolutePath;
     console.log('k6ScriptFilePath=', k6ScriptFilePath);
-    // runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
-    //     // fs.unlink(k6ScriptFilePath, (err) => {
-    //     //     if (err) {
-    //     //         console.error(err);
-    //     //         return;
-    //     //     }
-
-    //     //     console.log('File deleted successfully');
-    //     // });
-    //     res.send(data);
-    // });
+    runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
+        res.send(data);
+    });
 })
 
 app.get('/pause', (req, res) => {
