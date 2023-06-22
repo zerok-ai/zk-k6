@@ -80,7 +80,7 @@ export class ScenariosRunner{
         var index = 0;
         this.scenarioProviders.forEach((scenarioProvider) => {
             var scenario = scenarioProvider()
-            console.log("looping scenario provider - ", scenario);
+            // console.log("looping scenario provider - ", scenario);
             scenario.stages = this.scenarioStage;
             scenario.preAllocatedVUs = this.initialVUs;
             scenario.maxVUs = this.maxVUs;
