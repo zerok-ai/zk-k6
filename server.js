@@ -218,7 +218,16 @@ app.get('/resume', (req, res) => {
 app.get('/reset', (req, res) => {
     serviceManager.markAllAsPaused();
     pkill.full('k6');
-    res.send("Reset done");
+    fs.readdir('./', (err, files) => {
+        files.forEach(file => {
+            if (file.startsWith('lastrun-')) {
+                fs.unlinkSync(file);
+            }
+        });
+        // res.send('deleted');
+        res.send("Reset done");
+    });
+    
 })
 
 app.get('/mark-closed/:service', (req, res) => {
