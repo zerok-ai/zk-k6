@@ -6,6 +6,27 @@ class ServiceManager {
         this.possibleServices = POSSIBLE_SERVICES;
     }
 
+    //Add a service
+    addService(serviceName) {
+        if (this.isValid(serviceName)) {
+            return;
+        }
+        
+        this.services[serviceName] = {
+            "name": serviceName,
+            "isRunning": false
+        };
+        this.possibleServices.push(serviceName);
+    }
+
+    //Remove a service
+    removeService(serviceName) {
+        if (this.isValid(serviceName)) {
+            delete this.services[serviceName];
+            this.possibleServices = this.possibleServices.filter(service => service !== serviceName);
+        }
+    }
+
     // check if service is valid
     isValid(serviceName) {
         if (serviceName && this.possibleServices.includes(serviceName)) {

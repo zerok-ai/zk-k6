@@ -1,7 +1,7 @@
 const express = require('express')
 const pkill = require('pkill');
 const fs = require('fs');
-const { PROM_URL, APP_PORT } = require('./configs/resolver');
+const { PROM_URL, K6_URL_BASE, APP_PORT } = require('./configs/resolver');
 const app = express()
 const path = require('path');
 const { ServiceManager } = require("./configs/serviceManager");
@@ -93,11 +93,13 @@ function runTestForService(params, callback) {
     }
     console.log('start/service - ' + service);
 
-    const isServiceValid = serviceManager.isValid(service);
-    if (!isServiceValid) {
-        callback('Invalid service name')
-        return;
-    }
+    serviceManager.addService(service);
+
+    // const isServiceValid = serviceManager.isValid(service);
+    // if (!isServiceValid) {
+    //     callback('Invalid service name')
+    //     return;
+    // }
 
     if (serviceManager.isRunning(service)) {
         status(service, (data) => {
@@ -289,7 +291,7 @@ async function startK6(params) {
         K6_PROMETHEUS_REMOTE_URL="${PROM_URL}" \
         ./k6/k6 run --no-connection-reuse -o output-prometheus-remote -e CONCURRENCY="${concurrency}" \
         -e SERVICE="${service}" -e TIMEUNIT="${timeunit}" -e DURATION="${duration}" -e STAGES="${stages}" \
-        -e RATE=${rate} -e PROMETHEUS_REMOTE_URL="${PROM_URL}" -e INITIAL_VUS="${initialVUs}" \
+        -e RATE=${rate} -e PROMETHEUS_REMOTE_URL="${PROM_URL}" -e INITIAL_VUS="${initialVUs}" -e K6_URL_BASE="${K6_URL_BASE}" \
         -e MAX_VUS="${maxVUs}" -e HOST="${host}" -e SCENARIO="${service}" -e TEST_TAG="${testTag}" --tag run="${dateString}" \
         ${k6ScriptFilePath} 2>&1 | tee "lastrun-${service}.log" `;
 

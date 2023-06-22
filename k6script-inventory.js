@@ -1,19 +1,24 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner, SCENARIO, HOST, TEST_TAG, teardownToBeExported } from './k6/scenarioRunner.js';
+import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './k6/scenarioRunner.js';
 
-const CHECKOUT_SCENARIO = SCENARIO + "_checkout"; //app_checkout, zk_checkout
+const INVENTORY_SCENARIO = SCENARIO + "_inventory";
 
 const scenarioRunner = new ScenariosRunner();
 const scenarioProvider = () => {
   return {
         executor: 'ramping-arrival-rate',
-        exec: 'checkout',
+        exec: 'inventory',
         startRate: 1,
         startTime: '0s'
     };
 }
-scenarioRunner.registerScenarioProvider(CHECKOUT_SCENARIO, scenarioProvider);
+const service = {
+    name: 'sofa-shop',
+    exec: 'inventory',
+    host: 'inventory.sofa-shop.svc.cluster.local',
+}
+scenarioRunner.registerScenarioProvider(INVENTORY_SCENARIO, scenarioProvider);
 
 //k6 const to be exported
 export const options = {
@@ -26,7 +31,7 @@ export function setup() {
   console.log(options)
 }
 
-export function checkout() {
+export function inventory() {
   const stageIndex = scenarioRunner.processStageIndex();
   const params = {
       tags: {
@@ -38,16 +43,13 @@ export function checkout() {
       'rate-limit': scenarioRunner.stageToRateLimit[stageIndex + '']
     }
   }
-  // const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
-  var url = 'http://' + HOST + '/api/inventory/all';
+  var url = 'http://' + service.host + '/api/inventory/all';
   const res = http.get(url, params);
   // console.log('res.body  ', url, '  ', res.status, ' ')
-  scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res);
+  scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
   sleep(.5);
 }
 
 export function teardown(data){
   teardownToBeExported(scenarioRunner)
 }
-
-// checkout();

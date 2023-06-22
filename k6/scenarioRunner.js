@@ -15,6 +15,7 @@ export const SCENARIO = (__ENV.SCENARIO) ? __ENV.SCENARIO : __ENV.SERVICE;
 export const CONCURRENCY = __ENV.CONCURRENCY;
 export const TEST_TAG = __ENV.TEST_TAG;
 export const HOST = __ENV.HOST;
+export const K6_URL_BASE = __ENV.K6_URL_BASE;
 
 export class ScenariosRunner{
     constructor(){
@@ -113,54 +114,6 @@ export class ScenariosRunner{
     }
 }
 
-// const CHECKOUT_SCENARIO = SCENARIO + "_checkout"; //app_checkout, zk_checkout
-
-// const scenarioRunner = new ScenariosRunner();
-// scenarioRunner.registerScenarioProvider(() => {
-//     return {
-//         name: CHECKOUT_SCENARIO,
-//         executor: 'ramping-arrival-rate',
-//         exec: 'checkout',
-//         startRate: 1,
-//         startTime: '0s'
-//     };
-// });
-
-// //k6 const to be exported
-// export const options = {
-//   discardResponseBodies: true,
-//   scenarios: scenarioRunner.createScenarios(),
-// };
-
-// //k6 function to be exported
-// export function setup() {
-//   console.log(options)
-// }
-
-// const verticalScaleCount = {
-//   // Count variable to control Mem consumed by each highmem API call.
-//   'coupons': 15,  // 1 * 1MB
-//   // Count variable to control CPU consumed by each highcpu API call.
-//   'checkout': 333 * 1000,
-// }
-
-// export function checkout() {
-//   const stageIndex = scenarioRunner.processStageIndex();
-//   const params = {
-//       tags: {
-//         run_id: TEST_TAG,
-//       },
-//   };
-//   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
-//     params['headers'] = {
-//       'rate-limit': scenarioRunner.stageToRateLimit[stageIndex + '']
-//     }
-//   }
-//   const res = http.get('http://' + HOST + '/checkout?count=' + verticalScaleCount['checkout'], params);
-//   scenarioRunner.addTrendMetric(CHECKOUT_SCENARIO, res.timings[metric]);
-//   sleep(.5);
-// }
-
 // //k6 function to be exported
 export function teardownToBeExported(scenarioRunner) {
   // 4. teardown code
@@ -169,7 +122,7 @@ export function teardownToBeExported(scenarioRunner) {
   scenarioRunner.scenarioNames.forEach((scenarioName) => {
     scenarioRunner.addTrendMetric(scenarioName);
   });
-  const res = http.get('http://demo-load-generator.getanton.com/mark-closed/' + SERVICE, {
+  const res = http.get('http://' + K6_URL_BASE + '/mark-closed/' + SERVICE, {
     tags: {
       run_id: TEST_TAG,
     },
