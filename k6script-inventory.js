@@ -1,6 +1,6 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './k6/scenarioRunner.js';
+import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
 const INVENTORY_SCENARIO = SCENARIO + "_inventory";
 
