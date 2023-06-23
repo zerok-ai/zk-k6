@@ -1,5 +1,6 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
+// const crypto = require('k6/crypto');
 import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
 const INVENTORY_SCENARIO = SCENARIO + "_inventory";
@@ -31,16 +32,28 @@ export function setup() {
   console.log(options)
 }
 
+// function generateRandomHexString(length) {
+//   const chars = 'ABCDEF0123456789';
+//   let result = '';
+
+//   while (result.length < length) {
+//     const randomBytes = crypto.randomBytes(length);
+//     for (let i = 0; i < randomBytes.length && result.length < length; i++) {
+//       const randomIndex = randomBytes[i] % chars.length;
+//       result += chars.charAt(randomIndex);
+//     }
+//   }
+
+//   return result;
+// }
+
 function generateRandomHexString(length) {
   const chars = 'ABCDEF0123456789';
   let result = '';
 
-  while (result.length < length) {
-    const randomBytes = crypto.randomBytes(length);
-    for (let i = 0; i < randomBytes.length && result.length < length; i++) {
-      const randomIndex = randomBytes[i] % chars.length;
-      result += chars.charAt(randomIndex);
-    }
+  for (let i = 0; i < length; i++) {
+    const randomIndex = Math.floor(Math.random() * chars.length);
+    result += chars.charAt(randomIndex);
   }
 
   return result;
@@ -60,6 +73,7 @@ export function inventory() {
   params['headers']['traceparent'] = '00' + '-' + 'k6test' + generateRandomHexString(26) + '-' + generateRandomHexString(16) + '-' + '00'
   var url = 'http://' + service.host + '/api/inventory/all';
   const res = http.get(url, params);
+  console.log('traceparent passed - ', params['headers']['traceparent']);
   // console.log('res.body  ', url, '  ', res.status, ' ')
   scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
   sleep(.5);
