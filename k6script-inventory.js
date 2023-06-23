@@ -31,18 +31,33 @@ export function setup() {
   console.log(options)
 }
 
+function generateRandomHexString(length) {
+  const chars = 'ABCDEF0123456789';
+  let result = '';
+
+  while (result.length < length) {
+    const randomBytes = crypto.randomBytes(length);
+    for (let i = 0; i < randomBytes.length && result.length < length; i++) {
+      const randomIndex = randomBytes[i] % chars.length;
+      result += chars.charAt(randomIndex);
+    }
+  }
+
+  return result;
+}
+
 export function inventory() {
   const stageIndex = scenarioRunner.processStageIndex();
   const params = {
       tags: {
         run_id: TEST_TAG,
       },
+      headers: {}
   };
   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
-    params['headers'] = {
-      'rate-limit': scenarioRunner.stageToRateLimit[stageIndex + '']
-    }
+    params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
+  params['headers']['traceparent'] = '00' + '-' + 'k6test' + generateRandomHexString(26) + '-' + generateRandomHexString(16) + '-' + '00'
   var url = 'http://' + service.host + '/api/inventory/all';
   const res = http.get(url, params);
   // console.log('res.body  ', url, '  ', res.status, ' ')
