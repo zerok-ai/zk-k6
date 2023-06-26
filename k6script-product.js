@@ -3,7 +3,7 @@ import http from 'k6/http';
 // const crypto = require('k6/crypto');
 import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
-const PRODUCT_SCENARIO = SCENARIO + "_product";
+const PRODUCT_SCENARIO = SCENARIO;// + "_product";
 
 const scenarioRunner = new ScenariosRunner();
 const scenarioProvider = () => {
@@ -15,7 +15,7 @@ const scenarioProvider = () => {
     };
 }
 const service = {
-    name: 'sofa-shop',
+    name: 'sofa-shop-product',
     exec: 'product',
     host: 'product.sofa-shop.svc.cluster.local',
 }
