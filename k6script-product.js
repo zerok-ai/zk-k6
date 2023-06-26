@@ -3,23 +3,23 @@ import http from 'k6/http';
 // const crypto = require('k6/crypto');
 import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
-const INVENTORY_SCENARIO = SCENARIO + "_inventory";
+const PRODUCT_SCENARIO = SCENARIO + "_product";
 
 const scenarioRunner = new ScenariosRunner();
 const scenarioProvider = () => {
   return {
         executor: 'ramping-arrival-rate',
-        exec: 'inventory',
+        exec: 'product',
         startRate: 1,
         startTime: '0s'
     };
 }
 const service = {
     name: 'sofa-shop',
-    exec: 'inventory',
-    host: 'inventory.sofa-shop.svc.cluster.local',
+    exec: 'product',
+    host: 'product.sofa-shop.svc.cluster.local',
 }
-scenarioRunner.registerScenarioProvider(INVENTORY_SCENARIO, scenarioProvider);
+scenarioRunner.registerScenarioProvider(PRODUCT_SCENARIO, scenarioProvider);
 
 //k6 const to be exported
 export const options = {
@@ -59,7 +59,7 @@ function generateRandomHexString(length) {
   return result;
 }
 
-export function inventory() {
+export function product() {
   const stageIndex = scenarioRunner.processStageIndex();
   const params = {
       tags: {
@@ -70,10 +70,10 @@ export function inventory() {
   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
     params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
-  params['headers']['traceparent'] = '00' + '-' + 'k6testinvn' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
-  var url = 'http://' + service.host + '/api/inventory/all';
+  params['headers']['traceparent'] = '00' + '-' + 'k6testprdt' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
+  var url = 'http://' + service.host + '/api/product';
   const res = http.get(url, params);
-  scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
+  scenarioRunner.addTrendMetric(PRODUCT_SCENARIO, res);
   sleep(.5);
 }
 

@@ -3,23 +3,23 @@ import http from 'k6/http';
 // const crypto = require('k6/crypto');
 import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
-const INVENTORY_SCENARIO = SCENARIO + "_inventory";
+const ORDER_SCENARIO = SCENARIO + "_order";
 
 const scenarioRunner = new ScenariosRunner();
 const scenarioProvider = () => {
   return {
         executor: 'ramping-arrival-rate',
-        exec: 'inventory',
+        exec: 'order',
         startRate: 1,
         startTime: '0s'
     };
 }
 const service = {
     name: 'sofa-shop',
-    exec: 'inventory',
-    host: 'inventory.sofa-shop.svc.cluster.local',
+    exec: 'order',
+    host: 'order.sofa-shop.svc.cluster.local',
 }
-scenarioRunner.registerScenarioProvider(INVENTORY_SCENARIO, scenarioProvider);
+scenarioRunner.registerScenarioProvider(ORDER_SCENARIO, scenarioProvider);
 
 //k6 const to be exported
 export const options = {
@@ -59,7 +59,7 @@ function generateRandomHexString(length) {
   return result;
 }
 
-export function inventory() {
+export function order() {
   const stageIndex = scenarioRunner.processStageIndex();
   const params = {
       tags: {
@@ -70,10 +70,20 @@ export function inventory() {
   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
     params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
-  params['headers']['traceparent'] = '00' + '-' + 'k6testinvn' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
-  var url = 'http://' + service.host + '/api/inventory/all';
-  const res = http.get(url, params);
-  scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
+  params['headers']['traceparent'] = '00' + '-' + 'k6testordr' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
+  params['headers']['Content-Type'] = 'application/json'
+  var url = 'http://' + service.host + '/api/order';
+  var body = {
+      "orderLineItemsDtoList": [
+          {
+              "skuCode":"iphone 13",
+              "price":1200,
+              "quantity":1
+          }
+      ]
+  }
+  const res = http.post(url, body, params);
+  scenarioRunner.addTrendMetric(ORDER_SCENARIO, res);
   sleep(.5);
 }
 
