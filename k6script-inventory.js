@@ -70,7 +70,7 @@ export function inventory() {
   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
     params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
-  params['headers']['traceparent'] = '00' + '-' + 'k6testinvn' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
+  params['headers']['traceparent'] = '00' + '-' + 'bbbbbbbb' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
   var url = 'http://' + service.host + '/api/inventory/all';
   const res = http.get(url, params);
   scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
