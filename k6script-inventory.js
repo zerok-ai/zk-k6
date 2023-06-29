@@ -1,6 +1,5 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-// const crypto = require('k6/crypto');
 import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
 
 const INVENTORY_SCENARIO = SCENARIO;// + "_inventory";
@@ -32,23 +31,8 @@ export function setup() {
   console.log(options)
 }
 
-// function generateRandomHexString(length) {
-//   const chars = 'ABCDEF0123456789';
-//   let result = '';
-
-//   while (result.length < length) {
-//     const randomBytes = crypto.randomBytes(length);
-//     for (let i = 0; i < randomBytes.length && result.length < length; i++) {
-//       const randomIndex = randomBytes[i] % chars.length;
-//       result += chars.charAt(randomIndex);
-//     }
-//   }
-
-//   return result;
-// }
-
 function generateRandomHexString(length) {
-  const chars = 'ABCDEF0123456789';
+  const chars = 'abcdef0123456789';
   let result = '';
 
   for (let i = 0; i < length; i++) {
