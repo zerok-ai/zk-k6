@@ -70,7 +70,7 @@ export function order() {
   if (scenarioRunner.stageToRateLimit[stageIndex + '']) {
     params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
-  params['headers']['traceparent'] = '00' + '-' + 'eeeeeeee' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
+  params['headers']['traceparent'] = '00' + '-' + '6b6eeeee' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
   params['headers']['Content-Type'] = 'application/json'
   var url = 'http://' + service.host + '/api/order';
   var body2 = {
@@ -97,7 +97,7 @@ export function order() {
         "sku": "5e6dfeab-3b87-4834-a72f-b0e79741f3b4",
         "currentInventory": 10
       }
-    params['headers']['traceparent'] = '00' + '-' + 'cccccccc' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
+    params['headers']['traceparent'] = '00' + '-' + '6b6ccccc' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
     const updateInventoryResponse = http.put(updateInventoryUrl, JSON.stringify(updateInventoryBody), params);
     console.log('updateInventoryResponse Body -- ', updateInventoryResponse.body)
   }
