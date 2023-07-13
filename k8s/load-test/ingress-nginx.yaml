@@ -12,7 +12,7 @@ metadata:
     # nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
   rules:
-  - host: k6.avinpx07.getanton.com
+  - host: k6.loadclient01.getanton.com
     http:
       paths:
       - backend:

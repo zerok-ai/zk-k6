@@ -17,7 +17,7 @@ const scenarioProvider = () => {
 const service = {
     name: 'sofa-shop-order',
     exec: 'order',
-    host: 'order.sofa-shop.svc.cluster.local',
+    host: 'order.sofa-shop-mysql.svc.cluster.local',
 }
 scenarioRunner.registerScenarioProvider(ORDER_SCENARIO, scenarioProvider);
 
@@ -92,7 +92,7 @@ export function order() {
   }
   
   if(resBody.status == 500 && resBody.trace.includes('item not in stock')){
-    var updateInventoryUrl = 'http://inventory.sofa-shop.svc.cluster.local/api/inventory';
+    var updateInventoryUrl = 'http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory';
     var updateInventoryBody = {
         "sku": "5e6dfeab-3b87-4834-a72f-b0e79741f3b4",
         "currentInventory": 10

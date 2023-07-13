@@ -1,7 +1,7 @@
 [
     {
         "name": "sofa-shop",
-        "host": "inventory.sofa-shop.svc.cluster.local",
+        "host": "inventory.sofa-shop-mysql.svc.cluster.local",
         "queryParam": "sshop",
         "isRunning": false
     }

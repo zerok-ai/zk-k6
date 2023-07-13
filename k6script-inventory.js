@@ -16,7 +16,7 @@ const scenarioProvider = () => {
 const service = {
     name: 'sofa-shop-inventory',
     exec: 'inventory',
-    host: 'inventory.sofa-shop.svc.cluster.local',
+    host: 'inventory.sofa-shop-mysql.svc.cluster.local',
 }
 scenarioRunner.registerScenarioProvider(INVENTORY_SCENARIO, scenarioProvider);
 
