@@ -1,161 +1,66 @@
 const express = require("express");
-const fs = require("fs");
 const { runTestForService } = require("../utils/startk6");
+const { getStartParamsFromRequest } = require("../utils/functions");
 
 const router = express.Router();
 
+const serviceParamToServiceMap = {
+  sapp: "app",
+  ssofa: "sofa_shop",
+  szk: "zk",
+  ssoak: "zk_soak",
+  sspill: "zk_spill",
+};
+
 // Start load test for a service
 router.get("/start/:service", (req, res) => {
-  const service = req.params.service;
-  const queryParams = req.query;
-  const initialVUs = queryParams.vus ? queryParams.vus : 1000;
-  const maxVUs = queryParams.mvus ? queryParams.mvus : 1000;
-  const rate = queryParams.rate ? queryParams.rate : 220;
-  const stages = queryParams.stages ? queryParams.stages : "1_300-1_400";
-  const duration = queryParams.duration ? queryParams.duration : "5m";
-  const timeunit = queryParams.timeunit ? queryParams.timeunit : "1m";
-  const concurrency = queryParams.concurrency ? queryParams.concurrency : "";
-  const testTag = queryParams.tag ? queryParams.tag : "none";
-  const k6ScriptFilePath = queryParams.k6ScriptFilePath;
-
-  runTestForService(
-    {
-      service,
-      initialVUs,
-      maxVUs,
-      rate,
-      stages,
-      duration,
-      timeunit,
-      concurrency,
-      testTag,
-      k6ScriptFilePath,
-    },
-    (data) => {
-      res.send(data);
-    }
-  );
+  const params = getStartParamsFromRequest(req, "service");
+  try {
+    runTestForService({ ...params }, (data) => {
+      const status = data.status ?? 200;
+      res.status(status).send({
+        ...data,
+      });
+    });
+  } catch (err) {
+    return res.status(500).send({
+      err,
+    });
+  }
 });
 
 // Start concurrent load tests for a service
 router.get("/start-concurrent-tests", (req, res) => {
-  const queryParams = req.query;
-  const initialVUs = queryParams.vus ? queryParams.vus : 1000;
-  const maxVUs = queryParams.mvus ? queryParams.mvus : 1000;
-  const rate = queryParams.rate ? queryParams.rate : 220;
-  const duration = queryParams.duration ? queryParams.duration : "5m";
-  const timeunit = queryParams.timeunit ? queryParams.timeunit : "1m";
-  const concurrency = queryParams.concurrency ? queryParams.concurrency : "";
-  const testTag = queryParams.tag ? queryParams.tag : "none";
-
+  const params = getStartParamsFromRequest(req, "concurrent");
   /**
-   * sample =  vus=2000&mvus=2000&rate=1800&stages=[[time]_[requests]_[ratelimit]]-[[time]_[requests]_[ratelimit]]_...
+   * sample params =  vus=2000&mvus=2000&rate=1800&stages=[[time]_[requests]_[ratelimit]]-[[time]_[requests]_[ratelimit]]_...
    * where ratelimit is defined as -> [Rate For Checkout]:[Rate For Coupon]
    */
-
-  var testAttempted = false;
-  if (queryParams.sapp) {
-    testAttempted = true;
-    var service = "app";
-    runTestForService(
-      {
-        service,
-        initialVUs,
-        maxVUs,
-        rate,
-        stages: queryParams.sapp,
-        duration,
-        timeunit,
-        concurrency,
-        testTag,
-      },
-      (data) => {}
-    );
+  const serviceParam =
+    query.sapp ?? query.ssofa ?? query.szk ?? query.ssoak ?? query.sspill;
+  if (!serviceParam || !serviceParamToServiceMap[serviceParam]) {
+    return res.status(400).send({
+      message: "Invalid service",
+    });
   }
-
-  if (queryParams.ssofa) {
-    testAttempted = true;
-    var service = "sofa_shop";
-    runTestForService(
-      {
-        service,
-        initialVUs,
-        maxVUs,
-        rate,
-        stages: queryParams.ssofa,
-        duration,
-        timeunit,
-        concurrency,
-        testTag,
-      },
-      (data) => {}
-    );
+  const service = serviceParamToServiceMap[serviceParam];
+  const finalParams = {
+    ...params,
+    service,
+    stages: queryParams[serviceParam],
+  };
+  try {
+    runTestForService({ ...finalParams }, (data) => {
+      const status = data.status ?? 200;
+      res.status(status).send({
+        ...data,
+      });
+    });
+  } catch (err) {
+    return res.status(500).send({
+      err,
+    });
   }
-
-  if (queryParams.szk) {
-    testAttempted = true;
-    var service = "zk";
-    runTestForService(
-      {
-        service,
-        initialVUs,
-        maxVUs,
-        rate,
-        stages: queryParams.szk,
-        duration,
-        timeunit,
-        concurrency,
-        testTag,
-      },
-      (data) => {}
-    );
-  }
-
-  if (queryParams.ssoak) {
-    testAttempted = true;
-    var service = "zk_soak";
-    runTestForService(
-      {
-        service,
-        initialVUs,
-        maxVUs,
-        rate,
-        stages: queryParams.ssoak,
-        duration,
-        timeunit,
-        concurrency,
-        testTag,
-      },
-      (data) => {}
-    );
-  }
-
-  if (queryParams.sspill) {
-    testAttempted = true;
-    var service = "zk_spill";
-    runTestForService(
-      {
-        service,
-        initialVUs,
-        maxVUs,
-        rate,
-        stages: queryParams.sspill,
-        duration,
-        timeunit,
-        concurrency,
-        testTag,
-      },
-      (data) => {}
-    );
-  }
-
-  if (!testAttempted) {
-    console.log(`no test in query parameters`);
-  }
-
-  res.send({
-    message: "Tests started",
-  });
 });
 
 module.exports = router;

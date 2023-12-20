@@ -1,8 +1,8 @@
-const { ServiceManager } = require("../configs/serviceManager.js");
 const { PROM_URL, K6_URL_BASE } = require("../configs/resolver.js");
 const execute = require("child_process").exec;
 const { status } = require("./k6ControlFunctions.js");
-const serviceManager = new ServiceManager();
+const serviceManager = require("../configs/serviceManager.js");
+const controlManager = require("../configs/k6ControlManager.js");
 async function startK6(params) {
   const {
     service,
@@ -55,20 +55,13 @@ async function startK6(params) {
   }
 }
 
-function runTestForService(params, callback) {
-  const {
-    service,
-    initialVUs,
-    maxVUs,
-    rate,
-    stages,
-    duration,
-    timeunit,
-    concurrency,
-    testTag,
-  } = params;
-  if (paused && serviceManager.isRunning(service)) {
-    callback("Tests are in paused state. Try resuming them!");
+async function runTestForService(params, callback) {
+  const { service } = params;
+  if (controlManager.isK6Paused() && serviceManager.isRunning(service)) {
+    callback({
+      message: "Tests are paused",
+      status: 200,
+    });
     return;
   }
   console.log("start/service - " + service);
@@ -77,24 +70,36 @@ function runTestForService(params, callback) {
 
   const isServiceValid = serviceManager.isValid(service);
   if (!isServiceValid) {
-    callback("Invalid service name");
+    callback({
+      message: "Service is not valid",
+      status: 400,
+    });
     return;
   }
 
   if (serviceManager.isRunning(service)) {
     status(service, (data) => {
-      callback(data);
+      callback({
+        message: "Service is already running",
+        status: 204,
+        data,
+      });
     });
     return;
   }
-
   serviceManager.markRunning(service, true);
   try {
     startK6(params);
-    callback("Started");
+    callback({
+      message: "Started tests",
+      status: 200,
+    });
   } catch (error) {
     serviceManager.markRunning(service, false);
-    callback(error);
+    callback({
+      message: "Error occured while starting tests",
+      status: 500,
+    });
     return;
   }
 }

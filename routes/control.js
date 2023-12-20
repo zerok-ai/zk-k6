@@ -1,7 +1,7 @@
 const express = require("express");
 const pkill = require("pkill");
-const { ServiceManager } = require("../configs/serviceManager.js");
-const serviceManager = new ServiceManager();
+const serviceManager = require("../configs/serviceManager.js");
+const controlManager = require("../configs/k6ControlManager.js");
 const fs = require("fs");
 const {
   pauseK6,
@@ -14,55 +14,27 @@ const router = express.Router();
 let running = false;
 let paused = false;
 
+console.log(controlManager.isK6Running());
+
 /* 
     Pauses k6 process
 */
-router.get("/pause", (req, res) => {
-  if (!running) {
-    res.send({
-      message: "No tests are running. Nothing to pause!",
-    });
-    return;
-  }
-  if (paused) {
-    res.send({
-      message: "K6 is already paused",
-    });
-    return;
-  }
-  paused = true;
+router.get("/pause", async (req, res) => {
   try {
-    pauseK6();
-    res.send({
-      message: "K6 paused",
-    });
+    return res.send(await controlManager.pauseTests());
   } catch (error) {
-    paused = false;
-    res.status(500).send({
+    return res.status(500).send({
       err: error,
     });
-    return;
   }
 });
 
 // Resume k6 process
-router.get("/resume", (req, res) => {
-  if (!running) {
-    res.send("No tests are running. Nothing to resume!");
-    return;
-  }
-  if (!paused && running) {
-    res.send("Already running");
-    return;
-  }
-  paused = false;
+router.get("/resume", async (req, res) => {
   try {
-    resumeK6();
-    res.send("Resumed");
+    return res.send(await controlManager.resumeTests());
   } catch (error) {
-    paused = false;
-    res.send(error);
-    return;
+    return res.send(error);
   }
 });
 

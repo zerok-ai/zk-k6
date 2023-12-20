@@ -81,6 +81,6 @@ class ServiceManager {
     }
 
 }
+const serviceManager = new ServiceManager();
 
-
-exports.ServiceManager = ServiceManager;
+module.exports = serviceManager;

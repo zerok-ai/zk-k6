@@ -1,16 +1,17 @@
+const execute = require("child_process").exec;
+
 async function pauseK6() {
   try {
-    console.log("Pausing Tests");
     // const passwdContent = await execute("cat /etc/passwd");
     execute("sh ../core/pause_xk6.sh", (err, stdout, stderr) => {
       console.log(err, stdout, stderr);
       if (err != null) {
-        console.log("Error occured while pausing");
-        paused = false;
+        throw "Error pausing tests";
       }
     });
   } catch (error) {
-    console.error(error.toString());
+    console.log({ error });
+    throw "Error pausing tests";
   }
 }
 
@@ -19,14 +20,14 @@ async function resumeK6() {
     console.log("Resuming Tests");
     // const passwdContent = await execute("cat /etc/passwd");
     execute("sh ../core/resume_xk6.sh", (err, stdout, stderr) => {
-      console.log(err, stdout, stderr);
       if (err === null) {
         console.log("Resumed successfully");
-        paused = false;
       }
+      throw "Error resuming tests";
     });
   } catch (error) {
     console.error(error.toString());
+    throw "Error resuming tests";
   }
 }
 
@@ -36,11 +37,13 @@ async function scaleK6(newVUs) {
     // const passwdContent = await execute("cat /etc/passwd");
     execute("sh ../core/scale_xk6.sh " + newVUs, (err, stdout, stderr) => {
       console.log(err, stdout, stderr);
-      if (err === null) {
+      if (err !== null) {
+        throw "Error scaling tests";
       }
     });
   } catch (error) {
     console.error(error.toString());
+    throw "Error scaling tests";
   }
 }
 
