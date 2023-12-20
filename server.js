@@ -51,6 +51,8 @@ app.use(controlRoutes);
   * /list/:scenario - Lists all runs for a scenario
   * /fetch/:scenario/:run - Fetches the run file for a scenario
 */
+app.use(scenariosRoutes);
+
 
 // Start server
 app.listen(APP_PORT, () => {
