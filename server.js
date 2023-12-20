@@ -143,9 +143,12 @@ app.get('/start/:service', (req, res) => {
     const timeunit = (queryParams.timeunit) ? queryParams.timeunit : '1m';
     const concurrency = (queryParams.concurrency) ? queryParams.concurrency : "";
     const testTag = (queryParams.tag) ? queryParams.tag : "none";
+    const rndon = (queryParams.rndon) ? queryParams.rndon : false;
+    const rndlimit = (queryParams.rndlimit) ? queryParams.rndlimit : 0;
+    const rndmemon = (queryParams.rndmemon) ? queryParams.rndmemon : 0;
     const k6ScriptFilePath = queryParams.k6ScriptFilePath;
 
-    runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
+    runTestForService({ rndon, rndlimit, rndmemon, service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
         res.send(data);
     });
 })
@@ -223,7 +226,26 @@ app.get('/reset', (req, res) => {
     fs.readdir('./', (err, files) => {
         files.forEach(file => {
             if (file.startsWith('lastrun-')) {
-                fs.unlinkSync(file);
+                //extract string sofa-shop-inventory from string lastrun-sofa-shop-inventory.log
+                const regex = /lastrun-(.*).log/;
+                const scenarioName = file.match(regex)[1];
+
+                //create a folder with the service name if it doesn't exist under runs folder
+                const folderPath = path.join(folderToServe, scenarioName);
+                if (!fs.existsSync(folderPath)) {
+                    fs.mkdirSync(folderPath);
+                }
+                //move the file to the folder created above
+                const oldPath = path.join(__dirname, file);
+                var newPath = path.join(folderPath, file);
+
+                // append timestamp in YYYYmmddHHMMSS in IST time format to file name
+                // const dateIST = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+                // const dateStringIST = dateIST.getUTCFullYear() + "" + (dateIST.getUTCMonth() + 1) + dateIST.getUTCDate() + dateIST.getUTCHours() + dateIST.getUTCMinutes() + dateIST.getUTCSeconds();
+                newPath = newPath.replace('.log', '-' + Date.now() + '.log');
+
+                fs.renameSync(oldPath, newPath);
+                // fs.unlinkSync(file);
             }
         });
         // res.send('deleted');
@@ -231,6 +253,42 @@ app.get('/reset', (req, res) => {
     });
     
 })
+
+
+// app.get('/reset/scenario/:scenario', (req, res) => {
+//     const scenarioName = req.params.scenario;
+//     serviceManager.markAllAsPaused();
+//     pkill.full('k6');
+//     fs.readdir('./', (err, files) => {
+//         files.forEach(file => {
+//             if (file.startsWith('lastrun-')) {
+//                 //extract string sofa-shop-inventory from string lastrun-sofa-shop-inventory.log
+//                 const regex = /lastrun-(.*).log/;
+//                 const scenarioName = file.match(regex)[1];
+
+//                 //create a folder with the service name if it doesn't exist under runs folder
+//                 const folderPath = path.join(folderToServe, scenarioName);
+//                 if (!fs.existsSync(folderPath)) {
+//                     fs.mkdirSync(folderPath);
+//                 }
+//                 //move the file to the folder created above
+//                 const oldPath = path.join(__dirname, file);
+//                 var newPath = path.join(folderPath, file);
+
+//                 // append timestamp in YYYYmmddHHMMSS in IST time format to file name
+//                 const dateIST = new Date().toLocaleString("en-US", {timeZone: "Asia/Kolkata"});
+//                 const dateStringIST = dateIST.getUTCFullYear() + "" + (dateIST.getUTCMonth() + 1) + dateIST.getUTCDate() + dateIST.getUTCHours() + dateIST.getUTCMinutes() + dateIST.getUTCSeconds();
+//                 newPath = newPath.replace('.log', '-' + dateStringIST + '.log');
+
+//                 fs.renameSync(oldPath, newPath);
+//                 // fs.unlinkSync(file);
+//             }
+//         });
+//         // res.send('deleted');
+//         res.send("Reset done");
+//     });
+    
+// })
 
 app.get('/mark-closed/:service', (req, res) => {
     const service = req.params.service;
@@ -272,6 +330,13 @@ app.get('/status/:service', (req, res) => {
     status(service, (data) => res.send(data.toString()));
 })
 
+app.get('/history/status/:service', (req, res) => {
+    const service = req.params.service;
+    console.log('history/status/service - ' + service);
+
+    statusHistorical(service, (data) => res.send(data.toString()));
+})
+
 
 
 app.listen(APP_PORT, () => {
@@ -279,7 +344,7 @@ app.listen(APP_PORT, () => {
 })
 
 async function startK6(params) {
-    const { service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath } = params;
+    const { service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath, rndon, rndlimit, rndmemon } = params;
     //app, zk, zk-spill, zk-soak
     try {   
         let host = serviceManager.getHost(service);
@@ -290,7 +355,7 @@ async function startK6(params) {
         let command = `ulimit -n 65536;
         K6_PROMETHEUS_REMOTE_URL="${PROM_URL}" \
         ./core/k6 run --no-connection-reuse -o output-prometheus-remote -e CONCURRENCY="${concurrency}" \
-        -e SERVICE="${service}" -e TIMEUNIT="${timeunit}" -e DURATION="${duration}" -e STAGES="${stages}" \
+        -e SERVICE="${service}" -e RNDMEMON="${rndmemon}" -e RNDON="${rndon}" -e RNDLIMIT="${rndlimit}" -e TIMEUNIT="${timeunit}" -e DURATION="${duration}" -e STAGES="${stages}" \
         -e RATE=${rate} -e PROMETHEUS_REMOTE_URL="${PROM_URL}" -e INITIAL_VUS="${initialVUs}" -e K6_URL_BASE="${K6_URL_BASE}" \
         -e MAX_VUS="${maxVUs}" -e HOST="${host}" -e SCENARIO="${service}" -e TEST_TAG="${testTag}" --tag run="${dateString}" \
         ${k6ScriptFilePath} 2>&1 | tee "lastrun-${service}.log" `;
@@ -299,7 +364,7 @@ async function startK6(params) {
         execute(command, (err, stdout, stderr) => {
                 console.log(err, stdout, stderr)
                 if (err != null) {
-                    console.log("Error occured while running");
+                    console.log("Error occured while running ", err);
                     serviceManager.markRunning(service, false);
                 }
             })
@@ -365,6 +430,96 @@ async function status(service, callback) {
         const template = "<html><body><pre> " + content + "</pre></body></html>";
         callback(template);
     });
+}
+
+async function statusHistorical(service, callback) {
+    //service conatins this string 'lastrun-sofa-shop-inventory-1690534442436.log'. Extract the service name from it. Service name is between the strings lastrun- and -<timespamt>.log
+    const pattern = /lastrun-(.*?)-\d+\.log/;
+
+    const scenarioName = pattern.exec(service)[1];
+    const filePath = './runs/' + scenarioName + '/' + service;
+    fs.readFile(filePath, function read(err, data) {
+        if (err) {
+            content = "No status available " + err;
+        } else {
+            content = data;
+        }
+        const template = "<html><body><pre> " + content + "</pre></body></html>";
+        callback(template);
+    });
+}
+
+const folderToServe = path.join(__dirname, 'runs');
+
+// Define a route to handle incoming requests
+app.get('/list/:scenario', (req, res) => {
+  const scenario = req.params.scenario;
+
+  // Construct the file path
+  const filePath = path.join(folderToServe, scenario);
+
+  // Check if the file exists
+  fs.access(filePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      res.status(404).json({ error: 'Scenario not found' });
+    } else {
+      //Get files in folder path present here filePath
+        fs.readdir(filePath, (err, files) => {
+            if (err) {
+                res.status(500).json({ error: 'Internal server error' });
+            } else {
+                res.send(files);
+            }
+        });
+    }
+  });
+});
+
+// Define a route to handle incoming requests
+app.get('/fetch/:scenario/:run', (req, res) => {
+  const scenario = req.params.scenario;
+  const runFileName = req.params.run;
+
+  // Construct the file path
+  const filePath = path.join(folderToServe, scenario);
+  const runFilePath = path.join(filePath, runFileName);
+
+  // Check if the file exists
+  fs.access(runFilePath, fs.constants.F_OK, (err) => {
+    if (err) {
+      res.status(404).json({ error: 'File not found' });
+    } else {
+      // Read and serve the file
+      fs.readFile(runFilePath, (err, data) => {
+        if (err) {
+          res.status(500).json({ error: 'Internal server error' });
+        } else {
+          // Set the appropriate Content-Type header based on the file's extension
+          const ext = path.extname(runFileName).toLowerCase();
+          const contentType = getContentType(ext);
+          res.set('Content-Type', contentType);
+          res.send(data);
+        }
+      });
+    }
+  });
+});
+
+// Helper function to determine the Content-Type based on the file extension
+function getContentType(ext) {
+  switch (ext) {
+    case '.html':
+      return 'text/html';
+    case '.css':
+      return 'text/css';
+    case '.js':
+      return 'text/javascript';
+    case '.json':
+      return 'application/json';
+    // Add more cases as needed for other file types
+    default:
+      return 'application/octet-stream';
+  }
 }
 
 

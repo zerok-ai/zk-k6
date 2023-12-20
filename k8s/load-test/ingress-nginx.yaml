@@ -3,7 +3,6 @@ kind: Ingress
 metadata:
   name: ing
   annotations:
-    kubernetes.io/ingress.class: nginx
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
     nginx.ingress.kubernetes.io/cors-allow-methods: "PUT, GET, POST, DELETE, OPTIONS"
@@ -11,8 +10,9 @@ metadata:
     nginx.ingress.kubernetes.io/enable-cors: "true"
     # nginx.ingress.kubernetes.io/rewrite-target: /$2
 spec:
+  ingressClassName: nginx
   rules:
-  - host: k6.loadclient01.getanton.com
+  - host: k6.loadclient02.getanton.com
     http:
       paths:
       - backend:

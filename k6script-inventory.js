@@ -1,6 +1,6 @@
-import { sleep } from 'k6';
+import { sleep, check } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
+import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported, RNDON, RNDLIMIT, RNDMEMON } from './core/scenarioRunner.js';
 
 const INVENTORY_SCENARIO = SCENARIO;// + "_inventory";
 
@@ -55,8 +55,11 @@ export function inventory() {
     params['headers']['rate-limit'] = scenarioRunner.stageToRateLimit[stageIndex + '']
   }
   params['headers']['traceparent'] = '00' + '-' + '6b6bbbbb' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
-  var url = 'http://' + service.host + '/api/inventory/all';
+  var url = 'http://' + service.host + '/api/inventory/all?rndon=' + RNDON + '&rndlimit=' + RNDLIMIT + '&rndmemon=' + RNDMEMON;
   const res = http.get(url, params);
+  check(res, {
+    'is status 200': (r) => r.status === 200,
+  });
   scenarioRunner.addTrendMetric(INVENTORY_SCENARIO, res);
   sleep(.5);
 }

@@ -15,6 +15,9 @@ export const CONCURRENCY = __ENV.CONCURRENCY;
 export const TEST_TAG = __ENV.TEST_TAG;
 export const HOST = __ENV.HOST;
 export const K6_URL_BASE = __ENV.K6_URL_BASE;
+export const RNDON = (__ENV.RNDON) ? __ENV.RNDON : false;
+export const RNDLIMIT = (__ENV.RNDLIMIT) ? __ENV.RNDLIMIT : 0;
+export const RNDMEMON = (__ENV.RNDMEMON) ? __ENV.RNDMEMON : false;
 
 export class ScenariosRunner{
     constructor(){

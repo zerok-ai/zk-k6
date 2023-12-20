@@ -2,7 +2,7 @@ LOCATION="us-west1"
 PROJECT_ID="zerok-dev"
 REPOSITORY="zk-commons"
 IMAGE="xk6"
-TAG="latest"
+TAG="loadclient02"
 ART_Repo_URI="$LOCATION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE:$TAG"
 docker build -t $IMAGE .
 

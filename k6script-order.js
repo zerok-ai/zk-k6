@@ -78,11 +78,12 @@ export function order() {
       "id": 0,
       "skuCode": "5e6dfeab-3b87-4834-a72f-b0e79741f3b4",
       "price": "825",
-      "quantity": 1
+      "quantity": 5
     }]
   }
 
   const res = http.post(url, JSON.stringify(body2), params);
+  // console.log('orderresponse Body -- ', res.body)
   var resBodyString = res.body;
   var resBody = {}
   try {
@@ -91,15 +92,15 @@ export function order() {
   } catch (error) {
   }
   
-  if(resBody.status == 500 && resBody.trace.includes('item not in stock')){
+  if(resBody && resBody.status && resBody.status == 500 && resBody.trace.includes('item not in stock')){
     var updateInventoryUrl = 'http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory';
     var updateInventoryBody = {
         "sku": "5e6dfeab-3b87-4834-a72f-b0e79741f3b4",
-        "currentInventory": 10
+        "currentInventory": 1
       }
     params['headers']['traceparent'] = '00' + '-' + '6b6ccccc' + generateRandomHexString(22) + '-' + generateRandomHexString(16) + '-' + '00'
     const updateInventoryResponse = http.put(updateInventoryUrl, JSON.stringify(updateInventoryBody), params);
-    console.log('updateInventoryResponse Body -- ', updateInventoryResponse.body)
+    // console.log('updateInventoryResponse Body -- ', updateInventoryResponse.body)
   }
   scenarioRunner.addTrendMetric(ORDER_SCENARIO, res);
   sleep(.5);
