@@ -6,6 +6,7 @@ const deleteRoutes = require("./routes/delete.js");
 const startRoutes = require("./routes/start.js");
 const uploadRoutes = require("./routes/uploadScript.js");
 const controlRoutes = require("./routes/control.js");
+const scenariosRoutes = require("./routes/scenarios.js");
 
 // PORT
 const { APP_PORT } = require("./configs/resolver.js");
@@ -45,7 +46,13 @@ app.use(uploadRoutes);
  */
 app.use(controlRoutes);
 
-// Start the server
+// ------------------ SCENARIOS ROUTES ------------------
+/* 
+  * /list/:scenario - Lists all runs for a scenario
+  * /fetch/:scenario/:run - Fetches the run file for a scenario
+*/
+
+// Start server
 app.listen(APP_PORT, () => {
   console.log(`Example app listening on port ${APP_PORT}`);
 });

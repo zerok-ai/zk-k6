@@ -24,6 +24,23 @@ const getStartParamsFromRequest = (req, type = "service") => {
   }
 };
 
+function getContentType(ext) {
+  switch (ext) {
+    case ".html":
+      return "text/html";
+    case ".css":
+      return "text/css";
+    case ".js":
+      return "text/javascript";
+    case ".json":
+      return "application/json";
+    // Add more cases as needed for other file types
+    default:
+      return "application/octet-stream";
+  }
+}
+
 module.exports = {
   getStartParamsFromRequest,
+  getContentType,
 };
