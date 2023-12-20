@@ -28,8 +28,8 @@ export class ScenariosRunner{
         this.myTrend = {};
         this.myGauge = new Gauge('concurrency');
         this.scenarioMetrics = ['waiting', 'duration']
-        this.scenarioProviders = []
-        this.scenarioNames = []
+        this.scenarioProviders = [];
+        this.scenarioNames = [];
     }
 
     registerScenarioProvider(scenarioName, scenarioProvider){

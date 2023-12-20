@@ -1,370 +1,51 @@
-const express = require('express')
-const pkill = require('pkill');
-const fs = require('fs');
-const { PROM_URL, K6_URL_BASE, APP_PORT } = require('./configs/resolver');
-const app = express()
-const path = require('path');
-const { ServiceManager } = require("./configs/serviceManager");
-const execute = require('child_process').exec
-const serviceManager = new ServiceManager();
-const multer = require('multer');
-const FILE_PREFIX = 'DELETELATER-';
-const storage = multer.diskStorage({
-    destination: './',
-    filename: function (req, file, callback) {
-        // Generate a custom filename
-        const uniquePrefix = FILE_PREFIX;
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-        const fileExtension = path.extname(file.originalname);
-        const fileName = uniquePrefix + file.fieldname + '-' + uniqueSuffix + fileExtension;
-        callback(null, fileName);
-    }
-});
-const upload = multer({ storage });
-// const upload = multer({ dest: './' });
-var running = false;
-var paused = false;
+const express = require("express");
+const app = express();
 
-//app, zk, zk-spill, zk-soak
-app.get('/start-concurrent-tests', (req, res) => {
+// ROUTES
+const deleteRoutes = require("./routes/delete.js");
+const startRoutes = require("./routes/start.js");
+const uploadRoutes = require("./routes/uploadScript.js");
+const controlRoutes = require("./routes/control.js");
 
-    const queryParams = req.query;
-    const initialVUs = (queryParams.vus) ? queryParams.vus : 1000;
-    const maxVUs = (queryParams.mvus) ? queryParams.mvus : 1000;
-    const rate = (queryParams.rate) ? queryParams.rate : 220;
-    const duration = (queryParams.duration) ? queryParams.duration : '5m';
-    const timeunit = (queryParams.timeunit) ? queryParams.timeunit : '1m';
-    const concurrency = (queryParams.concurrency) ? queryParams.concurrency : "";
-    const testTag = (queryParams.tag) ? queryParams.tag : "none";
-    
-    /**
-     * sample =  vus=2000&mvus=2000&rate=1800&stages=[[time]_[requests]_[ratelimit]]-[[time]_[requests]_[ratelimit]]_...
-     * where ratelimit is defined as -> [Rate For Checkout]:[Rate For Coupon]
-     */
-   
-    var testAttempted = false;
-    if (queryParams.sapp){
-        testAttempted = true;
-        var service = 'app';
-        runTestForService({ service, initialVUs, maxVUs, rate, stages: queryParams.sapp, duration, timeunit, concurrency, testTag }, (data) => {});
-    }
+// PORT
+const { APP_PORT } = require("./configs/resolver.js");
 
-    if (queryParams.ssofa){
-        testAttempted = true;
-        var service = 'sofa_shop';
-        runTestForService({ service, initialVUs, maxVUs, rate, stages: queryParams.ssofa, duration, timeunit, concurrency, testTag }, (data) => {});
-    }
- 
-    if (queryParams.szk) {
-        testAttempted = true;
-        var service = 'zk';
-        runTestForService({ service, initialVUs, maxVUs, rate, stages: queryParams.szk, duration, timeunit, concurrency, testTag }, (data) => {});    
+// ------------------ DELETE ROUTES ------------------
 
-    } 
-    
-    if (queryParams.ssoak) {
-        testAttempted = true;
-        var service = 'zk_soak';
-        runTestForService({ service, initialVUs, maxVUs, rate, stages: queryParams.ssoak, duration, timeunit, concurrency, testTag }, (data) => {});
+/*
+ * /delete-temp-files - Deletes all temp files
+ */
+app.use(deleteRoutes);
 
-    }
+// ------------------ START ROUTES ------------------
 
-    if (queryParams.sspill) {
-        testAttempted = true;
-        var service = 'zk_spill';
-        runTestForService({ service, initialVUs, maxVUs, rate, stages: queryParams.sspill, duration, timeunit, concurrency, testTag }, (data) => {});
-        
-    }
+/*
+ * /start/:service - Starts a test for a service
+ * /start-concurrent-tests - Starts concurrent tests for all services
+ */
+app.use(startRoutes);
 
-    if (!testAttempted){
-        console.log(`no test in query parameters`)
-    }
+// ------------------ UPLOAD ROUTES ------------------
 
-    res.send('started');
-})
+/*
+ * /upload - Uploads the script file to the storage from multer
+ * /start/:service (POST) - Starts a test for a service with the latest uploaded script file
+ */
+app.use(uploadRoutes);
 
+// ------------------ CONTROL ROUTES ------------------
 
-function runTestForService(params, callback) {
+/*
+ * /pause - Pauses all tests
+ * /resume - Resumes all tests
+ * /reset - Resets all tests
+ * /mark-closed/:service - Marks a service as closed
+ * /scale - Scales all running tests
+ * /status/:service - Gets the status of a service
+ */
+app.use(controlRoutes);
 
-    const { service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag } = params;
-    if (paused && serviceManager.isRunning(service)) {
-        callback('Tests are in paused state. Try resuming them!');
-        return;
-    }
-    console.log('start/service - ' + service);
-
-    serviceManager.addService(service);
-
-    // const isServiceValid = serviceManager.isValid(service);
-    // if (!isServiceValid) {
-    //     callback('Invalid service name')
-    //     return;
-    // }
-
-    if (serviceManager.isRunning(service)) {
-        status(service, (data) => {
-            callback(data);
-        });
-        return;
-    }
-
-    serviceManager.markRunning(service, true);
-    try {
-        startK6(params);
-        callback('Started');
-    } catch (error) {
-        serviceManager.markRunning(service, false);
-        callback(error);
-        return;
-    }
-}
-
-//app, zk, zk-spill, zk-soak
-app.get('/delete/temps', (req, res) => {
-    //delete all files with prefix FILE_PREFIX
-    fs.readdir('./', (err, files) => {
-        files.forEach(file => {
-            if (file.startsWith(FILE_PREFIX)) {
-                fs.unlinkSync(file);
-            }
-        });
-        res.send('deleted');
-    });
-});
-
-app.get('/start/:service', (req, res) => {
-    const service = req.params.service;
-    const queryParams = req.query;
-    const initialVUs = (queryParams.vus) ? queryParams.vus : 1000;
-    const maxVUs = (queryParams.mvus) ? queryParams.mvus : 1000;
-    const rate = (queryParams.rate) ? queryParams.rate : 220;
-    const stages = (queryParams.stages) ? queryParams.stages : '1_300-1_400';
-    const duration = (queryParams.duration) ? queryParams.duration : '5m';
-    const timeunit = (queryParams.timeunit) ? queryParams.timeunit : '1m';
-    const concurrency = (queryParams.concurrency) ? queryParams.concurrency : "";
-    const testTag = (queryParams.tag) ? queryParams.tag : "none";
-    const k6ScriptFilePath = queryParams.k6ScriptFilePath;
-
-    runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
-        res.send(data);
-    });
-})
-
-
-app.post('/upload', upload.single('file'), (req, res) => {
-    const file = req.file;
-    const absolutePath = path.resolve(file.path);
-    res.send('File uploaded at ' + absolutePath);
-})
-
-app.post('/start/:service', upload.single('file'), (req, res) => {
-    const file = req.file;
-    const absolutePath = path.resolve(file.path);
-    const service = req.params.service;
-    const queryParams = req.query;
-    const initialVUs = (queryParams.vus) ? queryParams.vus : 1000;
-    const maxVUs = (queryParams.mvus) ? queryParams.mvus : 1000;
-    const rate = (queryParams.rate) ? queryParams.rate : 220;
-    const stages = (queryParams.stages) ? queryParams.stages : '1_300-1_400';
-    const duration = (queryParams.duration) ? queryParams.duration : '5m';
-    const timeunit = (queryParams.timeunit) ? queryParams.timeunit : '1m';
-    const concurrency = (queryParams.concurrency) ? queryParams.concurrency : "";
-    const testTag = (queryParams.tag) ? queryParams.tag : "none";
-    const k6ScriptFilePath = absolutePath;
-    console.log('k6ScriptFilePath=', k6ScriptFilePath);
-    runTestForService({ service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath }, (data) => {
-        res.send(data);
-    });
-})
-
-app.get('/pause', (req, res) => {
-    if (!running) {
-        res.send('No tests are running. Nothing to pause!');
-        return;
-    }
-    if (paused) {
-        res.send('Paused');
-        return;
-    }
-    paused = true;
-    try {
-        pauseK6();
-        res.send('Paused');
-    } catch (error) {
-        paused = false;
-        res.send(error);
-        return;
-    }
-})
-
-app.get('/resume', (req, res) => {
-    if (!running) {
-        res.send('No tests are running. Nothing to resume!');
-        return;
-    }
-    if (!paused && running) {
-        res.send('Already running');
-        return;
-    }
-    paused = false;
-    try {
-        resumeK6();
-        res.send('Resumed');
-    } catch (error) {
-        paused = false;
-        res.send(error);
-        return;
-    }
-})
-
-app.get('/reset', (req, res) => {
-    serviceManager.markAllAsPaused();
-    pkill.full('k6');
-    fs.readdir('./', (err, files) => {
-        files.forEach(file => {
-            if (file.startsWith('lastrun-')) {
-                fs.unlinkSync(file);
-            }
-        });
-        // res.send('deleted');
-        res.send("Reset done");
-    });
-    
-})
-
-app.get('/mark-closed/:service', (req, res) => {
-    const service = req.params.service;
-    serviceManager.markRunning(service, false);
-    res.send("Marked for service " + service);
-})
-
-app.get('/scale', (req, res) => {
-    const queryParams = req.query;
-    const newVUs = queryParams.vus;
-
-    if (!newVUs || newVUs === 0) {
-        res.send('Invalid input!');
-        return;
-    }
-
-    if (!running) {
-        res.send('No tests are running. Nothing to scale!');
-        return;
-    }
-    try {
-        scaleK6(newVUs);
-        res.send('Scaled');
-    } catch (error) {
-        res.send(error);
-        return;
-    }
-})
-
-app.get('/status/:service', (req, res) => {
-    const service = req.params.service;
-    console.log('status/service - ' + service);
-    const isServiceValid = serviceManager.isValid(service);
-    if (!isServiceValid) {
-        res.send('Invalid service name')
-        return;
-    }
-
-    status(service, (data) => res.send(data.toString()));
-})
-
-
-
+// Start the server
 app.listen(APP_PORT, () => {
-    console.log(`Example app listening on port ${APP_PORT}`)
-})
-
-async function startK6(params) {
-    const { service, initialVUs, maxVUs, rate, stages, duration, timeunit, concurrency, testTag, k6ScriptFilePath } = params;
-    //app, zk, zk-spill, zk-soak
-    try {   
-        let host = serviceManager.getHost(service);
-        let date=new Date(Date.now());
-        var dateString = date.getUTCFullYear() +"/"+ (date.getUTCMonth()+1) +"/"+ date.getUTCDate() + " " + date.getUTCHours() + ":" + date.getUTCMinutes() + ":" + date.getUTCSeconds();
-
-        // k6 run --no-connection-reuse -o json -e CONCURRENCY="${concurrency}" \
-        let command = `ulimit -n 65536;
-        K6_PROMETHEUS_REMOTE_URL="${PROM_URL}" \
-        ./core/k6 run --no-connection-reuse -o output-prometheus-remote -e CONCURRENCY="${concurrency}" \
-        -e SERVICE="${service}" -e TIMEUNIT="${timeunit}" -e DURATION="${duration}" -e STAGES="${stages}" \
-        -e RATE=${rate} -e PROMETHEUS_REMOTE_URL="${PROM_URL}" -e INITIAL_VUS="${initialVUs}" -e K6_URL_BASE="${K6_URL_BASE}" \
-        -e MAX_VUS="${maxVUs}" -e HOST="${host}" -e SCENARIO="${service}" -e TEST_TAG="${testTag}" --tag run="${dateString}" \
-        ${k6ScriptFilePath} 2>&1 | tee "lastrun-${service}.log" `;
-
-        console.log("-- command: " + command);
-        execute(command, (err, stdout, stderr) => {
-                console.log(err, stdout, stderr)
-                if (err != null) {
-                    console.log("Error occured while running");
-                    serviceManager.markRunning(service, false);
-                }
-            })
-    } catch (error) {
-        console.error(error.toString());
-    }
-}
-
-async function pauseK6() {
-    try {
-        console.log("Pausing Tests");
-        // const passwdContent = await execute("cat /etc/passwd");
-        execute('sh ../core/pause_xk6.sh', (err, stdout, stderr) => {
-            console.log(err, stdout, stderr)
-            if (err != null) {
-                console.log("Error occured while pausing");
-                paused = false;
-            }
-        })
-    } catch (error) {
-        console.error(error.toString());
-    }
-}
-
-async function resumeK6() {
-    try {
-        console.log("Resuming Tests");
-        // const passwdContent = await execute("cat /etc/passwd");
-        execute('sh ../core/resume_xk6.sh', (err, stdout, stderr) => {
-            console.log(err, stdout, stderr)
-            if (err === null) {
-                console.log("Resumed successfully");
-                paused = false;
-            }
-        })
-    } catch (error) {
-        console.error(error.toString());
-    }
-}
-
-async function scaleK6(newVUs) {
-    try {
-        console.log("Scaling Tests with new VUs: " + newVUs);
-        // const passwdContent = await execute("cat /etc/passwd");
-        execute('sh ../core/scale_xk6.sh ' + newVUs, (err, stdout, stderr) => {
-            console.log(err, stdout, stderr)
-            if (err === null) {
-
-            }
-        })
-    } catch (error) {
-        console.error(error.toString());
-    }
-}
-
-async function status(service, callback) {
-    fs.readFile('./lastrun-' + service + '.log', function read(err, data) {
-        if (err) {
-            content = "No status available " + err;
-        } else {
-            content = data;
-        }
-        const template = "<html><body><pre> " + content + "</pre></body></html>";
-        callback(template);
-    });
-}
-
-
+  console.log(`Example app listening on port ${APP_PORT}`);
+});
