@@ -1,15 +1,16 @@
-const express = require("express");
+// express
+import express from "express";
+// ROUTES
+import deleteRoutes from "./routes/delete";
+import startRoutes from "./routes/start";
+import uploadRoutes from "./routes/uploadScript";
+import controlRoutes from "./routes/control";
+import scenariosRoutes from "./routes/scenarios";
+
 const app = express();
 
-// ROUTES
-const deleteRoutes = require("./routes/delete.js");
-const startRoutes = require("./routes/start.js");
-const uploadRoutes = require("./routes/uploadScript.js");
-const controlRoutes = require("./routes/control.js");
-const scenariosRoutes = require("./routes/scenarios.js");
-
 // PORT
-const { APP_PORT } = require("./configs/resolver.js");
+const { APP_PORT } = require("./configs/resolver");
 
 // ------------------ DELETE ROUTES ------------------
 
@@ -47,12 +48,11 @@ app.use(uploadRoutes);
 app.use(controlRoutes);
 
 // ------------------ SCENARIOS ROUTES ------------------
-/* 
-  * /list/:scenario - Lists all runs for a scenario
-  * /fetch/:scenario/:run - Fetches the run file for a scenario
-*/
+/*
+ * /list/:scenario - Lists all runs for a scenario
+ * /fetch/:scenario/:run - Fetches the run file for a scenario
+ */
 app.use(scenariosRoutes);
-
 
 // Start server
 app.listen(APP_PORT, () => {

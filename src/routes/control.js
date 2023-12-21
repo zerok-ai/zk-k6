@@ -8,7 +8,7 @@ const {
   resumeK6,
   scaleK6,
   status,
-} = require("../utils/k6ControlFunctions");
+} = require("../utils/k6ControlFunctions.js");
 const router = express.Router();
 
 let running = false;
@@ -93,9 +93,10 @@ router.get("/scale", (req, res) => {
 
 router.get("/status/:service", (req, res) => {
   const service = req.params.service;
+  const scenario = req.query.scenario;
   console.log("status/service - " + service);
-  const isServiceValid = serviceManager.isValid(service);
-  if (!isServiceValid) {
+  const isScenarioValid = serviceManager.isValidScenario(service, scenario);
+  if (!isScenarioValid) {
     res.status(400).send({
       message: "Invalid service",
     });

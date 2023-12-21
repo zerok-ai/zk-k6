@@ -3,6 +3,11 @@
         "name": "sofa-shop",
         "host": "inventory.sofa-shop-mysql.svc.cluster.local",
         "queryParam": "sshop",
-        "isRunning": false
+        "isRunning": false,
+        "scenarios": [
+            "inventory",
+            "order",
+            "product"
+        ]
     }
 ]

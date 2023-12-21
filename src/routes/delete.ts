@@ -1,10 +1,7 @@
-const express = require("express");
-const fs = require("fs");
+import fs from "fs";
+import express from "express";
 
-const {
-  DELETE_TEMP_FILES_ROUTE,
-  TEMP_FILE_PREFIX,
-} = require("../utils/constants");
+import { DELETE_TEMP_FILES_ROUTE, TEMP_FILE_PREFIX } from "utils/constants";
 
 const router = express.Router();
 
@@ -26,4 +23,4 @@ router.delete(DELETE_TEMP_FILES_ROUTE, (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

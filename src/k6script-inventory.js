@@ -1,6 +1,11 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
-import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
+import {
+  ScenariosRunner,
+  SCENARIO,
+  TEST_TAG,
+  teardownToBeExported,
+} from "./src/core/scenarioRunner.js";
 
 const INVENTORY_SCENARIO = SCENARIO;// + "_inventory";
 
@@ -14,10 +19,10 @@ const scenarioProvider = () => {
     };
 }
 const service = {
-    name: 'sofa-shop-inventory',
-    exec: 'inventory',
-    host: 'inventory.sofa-shop-mysql.svc.cluster.local',
-}
+  name: "sofa-shop-inventory",
+  exec: "inventory",
+  host: "https://sofa-shop.mysql.loadclient03.getanton.com/",
+};
 scenarioRunner.registerScenarioProvider(INVENTORY_SCENARIO, scenarioProvider);
 
 //k6 const to be exported

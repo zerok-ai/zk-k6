@@ -1,10 +1,12 @@
-const express = require("express");
-const { runTestForService } = require("../utils/startk6");
-const { getStartParamsFromRequest } = require("../utils/functions");
+import serviceManager from "configs/serviceManager";
+import express from "express";
+import { getStartParamsFromRequest } from "utils/functions";
+import { runTestForService } from "utils/startk6";
+import { GenericObject, ServiceNameType } from "utils/types";
 
 const router = express.Router();
 
-const serviceParamToServiceMap = {
+const serviceParamToServiceMap: GenericObject = {
   sapp: "app",
   ssofa: "sofa_shop",
   szk: "zk",
@@ -14,6 +16,14 @@ const serviceParamToServiceMap = {
 
 // Start load test for a service
 router.get("/start/:service", (req, res) => {
+  const service = req.params.service as ServiceNameType;
+  const scenario = req.query.scenario;
+  if (!serviceManager.isValidScenario(service, scenario as string)) {
+    return res.status(400).send({
+      message: "Invalid service and/or scenario",
+    });
+  }
+
   const params = getStartParamsFromRequest(req, "service");
   try {
     runTestForService({ ...params }, (data) => {
@@ -32,22 +42,26 @@ router.get("/start/:service", (req, res) => {
 // Start concurrent load tests for a service
 router.get("/start-concurrent-tests", (req, res) => {
   const params = getStartParamsFromRequest(req, "concurrent");
+  const query = req.query;
   /**
    * sample params =  vus=2000&mvus=2000&rate=1800&stages=[[time]_[requests]_[ratelimit]]-[[time]_[requests]_[ratelimit]]_...
    * where ratelimit is defined as -> [Rate For Checkout]:[Rate For Coupon]
    */
-  const serviceParam =
-    query.sapp ?? query.ssofa ?? query.szk ?? query.ssoak ?? query.sspill;
+  const serviceParam = (query.sapp ??
+    query.ssofa ??
+    query.szk ??
+    query.ssoak ??
+    query.sspill) as string;
   if (!serviceParam || !serviceParamToServiceMap[serviceParam]) {
     return res.status(400).send({
       message: "Invalid service",
     });
   }
-  const service = serviceParamToServiceMap[serviceParam];
+  const service = serviceParamToServiceMap[serviceParam as string];
   const finalParams = {
     ...params,
     service,
-    stages: queryParams[serviceParam],
+    stages: query[serviceParam],
   };
   try {
     runTestForService({ ...finalParams }, (data) => {
@@ -63,4 +77,4 @@ router.get("/start-concurrent-tests", (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

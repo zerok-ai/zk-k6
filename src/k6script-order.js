@@ -1,7 +1,12 @@
 import { sleep } from 'k6';
 import http from 'k6/http';
 // const crypto = require('k6/crypto');
-import { ScenariosRunner, SCENARIO, TEST_TAG, teardownToBeExported } from './core/scenarioRunner.js';
+import {
+  ScenariosRunner,
+  SCENARIO,
+  TEST_TAG,
+  teardownToBeExported,
+} from "./src/core/scenarioRunner.js";
 
 const ORDER_SCENARIO = SCENARIO;// + "_order";
 

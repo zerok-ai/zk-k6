@@ -1,4 +1,5 @@
 const execute = require("child_process").exec;
+const fs = require("fs");
 
 async function pauseK6() {
   try {

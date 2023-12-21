@@ -1,8 +1,9 @@
 const { DEFAULT_PARAMS } = require("./constants");
 
-const getStartParamsFromRequest = (req, type = "service") => {
+export const getStartParamsFromRequest = (req, type = "service") => {
   const service = req.params.service;
   const queryParams = req.query;
+  const scenario = queryParams.scenario;
   const params = {
     initialVUs: queryParams.vus ?? DEFAULT_PARAMS.INITIAL_VUS,
     maxVUs: queryParams.mvus ?? DEFAULT_PARAMS.MAX_VUS,
@@ -12,7 +13,8 @@ const getStartParamsFromRequest = (req, type = "service") => {
     timeunit: queryParams.timeunit ?? DEFAULT_PARAMS.TIMEUNIT,
     concurrency: queryParams.concurrency ?? DEFAULT_PARAMS.CONCURRENCY,
     testTag: queryParams.tag ?? DEFAULT_PARAMS.TEST_TAG,
-    k6ScriptFilePath: queryParams.k6ScriptFilePath,
+    k6Script: `../${service}/${scenario}.js`,
+    scenario,
   };
   switch (type) {
     case "service":
@@ -40,7 +42,13 @@ function getContentType(ext) {
   }
 }
 
+const getTestRunDateString = () => {
+  const date = new Date(Date.now());
+  return `${date.getUTCFullYear()}/${date.getUTCMonth()}/${date.getUTCDate()} ${date.getUTCHours()}:${date.getUTCMinutes()}:${date.getUTCSeconds()}`;
+};
+
 module.exports = {
   getStartParamsFromRequest,
   getContentType,
+  getTestRunDateString,
 };
