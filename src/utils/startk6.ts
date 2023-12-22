@@ -1,4 +1,5 @@
-import { CallbackStatusType } from "./types";
+import { ExecException } from "child_process";
+import { CallbackStatusType, K6ParamsType } from "./types";
 
 const { PROM_URL, K6_URL_BASE } = require("../configs/resolver.js");
 const execute = require("child_process").exec;
@@ -6,7 +7,7 @@ const { status } = require("./k6ControlFunctions.js");
 const serviceManager = require("../configs/serviceManager.js");
 const controlManager = require("../configs/k6ControlManager.js");
 const { getTestRunDateString } = require("./functions.js");
-export async function startK6(params) {
+export async function startK6(params: K6ParamsType) {
   const {
     service,
     initialVUs,
@@ -38,7 +39,7 @@ export async function startK6(params) {
       {
         cwd: __dirname,
       },
-      (err, stdout, stderr) => {
+      (err: ExecException | null, stdout: string, stderr: string) => {
         console.log(err, stdout, stderr);
         if (err != null) {
           console.log("Error occured while running");
@@ -46,16 +47,16 @@ export async function startK6(params) {
         }
       }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error(error.toString());
   }
 }
 
 export async function runTestForService(
-  params,
+  params: K6ParamsType,
   callback: (res: CallbackStatusType) => void
 ) {
-  const { service, scenario } = params;
+  const { service } = params;
   if (controlManager.isK6Paused() && serviceManager.isRunning(service)) {
     callback({
       message: "Tests are paused",

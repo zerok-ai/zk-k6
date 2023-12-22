@@ -2,7 +2,7 @@ import serviceManager from "configs/serviceManager";
 import express from "express";
 import { getStartParamsFromRequest } from "utils/functions";
 import { runTestForService } from "utils/startk6";
-import { GenericObject, ServiceNameType } from "utils/types";
+import { GenericObject, K6ParamsType, ServiceNameType } from "utils/types";
 
 const router = express.Router();
 
@@ -25,6 +25,7 @@ router.get("/start/:service", (req, res) => {
   }
 
   const params = getStartParamsFromRequest(req, "service");
+
   try {
     runTestForService({ ...params }, (data) => {
       const status = data.status ?? 200;
@@ -58,10 +59,10 @@ router.get("/start-concurrent-tests", (req, res) => {
     });
   }
   const service = serviceParamToServiceMap[serviceParam as string];
-  const finalParams = {
+  const finalParams: K6ParamsType = {
     ...params,
     service,
-    stages: query[serviceParam],
+    stages: query[serviceParam] as string,
   };
   try {
     runTestForService({ ...finalParams }, (data) => {

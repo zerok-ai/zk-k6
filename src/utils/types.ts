@@ -17,3 +17,17 @@ export interface CallbackStatusType {
   status: number;
   data?: any;
 }
+
+export interface K6ParamsType {
+  initialVUs: number;
+  maxVUs: number;
+  rate: number;
+  stages: string;
+  duration: string;
+  timeunit: string;
+  concurrency: string;
+  testTag?: string;
+  k6Script: string;
+  scenario: string;
+  service?: ServiceNameType;
+}

@@ -1,4 +1,5 @@
-const multer = require("multer");
+import multer from "multer";
+import path from "path";
 const { TEMP_FILE_PREFIX } = require("./constants");
 const storage = multer.diskStorage({
   destination: "../",
@@ -13,4 +14,4 @@ const storage = multer.diskStorage({
   },
 });
 const upload = multer({ storage });
-module.exports = upload;
+export default upload;

@@ -1,8 +1,7 @@
-const express = require("express");
-const fs = require("fs");
-const path = require("path");
-const { getContentType } = require("../utils/functions");
-const app = express();
+import express from "express";
+import fs from "fs";
+import path from "path";
+import { getContentType } from "utils/functions";
 const router = express.Router();
 
 const FOLDER_TO_SERVE = path.join(__dirname, "../runs");
@@ -59,4 +58,4 @@ router.get("/fetch/:scenario/:run", (req, res) => {
   });
 });
 
-module.exports = router;
+export default router;

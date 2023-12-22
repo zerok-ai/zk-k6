@@ -1,7 +1,8 @@
-const express = require("express");
+import express, { Request, Response } from "express";
 const pkill = require("pkill");
-const serviceManager = require("../configs/serviceManager.js");
-const controlManager = require("../configs/k6ControlManager.js");
+import controlManager from "configs/k6ControlManager";
+import serviceManager from "configs/serviceManager";
+
 const fs = require("fs");
 const {
   pauseK6,
