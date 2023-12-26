@@ -1,9 +1,8 @@
 import { ExecException } from "child_process";
 import { CallbackStatusType, K6ParamsType, ServiceNameType } from "./types";
 import { DEFAULT_K6_URL, DEFAULT_PROM_URL } from "./constants";
-import serviceManager from "configs/serviceManager";
+import serviceManager from "../configs/serviceManager";
 const execute = require("child_process").exec;
-const { status } = require("./k6ControlFunctions.js");
 
 const controlManager = require("../configs/k6ControlManager.js");
 const { getTestRunDateString } = require("./functions.js");

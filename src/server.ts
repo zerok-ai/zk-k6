@@ -5,7 +5,7 @@ import deleteRoutes from "./routes/delete";
 import startRoutes from "./routes/start";
 import controlRoutes from "./routes/control";
 import scenariosRoutes from "./routes/scenarios";
-import { APP_PORT } from "utils/constants";
+import { APP_PORT } from "./utils/constants";
 
 const app = express();
 
@@ -32,7 +32,7 @@ app.use(startRoutes);
  * /upload - Uploads the script file to the storage from multer
  * /start/:service (POST) - Starts a test for a service with the latest uploaded script file
  */
-app.use(uploadRoutes);
+// app.use(uploadRoutes);
 
 // ------------------ CONTROL ROUTES ------------------
 

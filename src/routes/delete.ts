@@ -1,7 +1,7 @@
 import fs from "fs";
 import express from "express";
 
-import { DELETE_TEMP_FILES_ROUTE, TEMP_FILE_PREFIX } from "utils/constants";
+import { DELETE_TEMP_FILES_ROUTE, TEMP_FILE_PREFIX } from "../utils/constants";
 
 const router = express.Router();
 

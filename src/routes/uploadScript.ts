@@ -1,8 +1,7 @@
 import express, { Request } from "express";
 import path from "path";
-import { getStartParamsFromRequest } from "utils/functions";
-import { runTestForService } from "utils/startk6";
-import upload from "utils/storage";
+import { getStartParamsFromRequest } from "../utils/functions";
+import upload from "../utils/storage";
 const router = express.Router();
 
 router.post("/upload", upload.single("file"), (req: Request, res) => {
@@ -15,16 +14,16 @@ router.post("/upload", upload.single("file"), (req: Request, res) => {
   });
 });
 
-router.post("/start/:service", upload.single("file"), (req, res) => {
-  const params = getStartParamsFromRequest(req, "service");
-  runTestForService(
-    {
-      ...params,
-    },
-    (data) => {
-      res.send(data);
-    }
-  );
-});
+// router.post("/start/:service", upload.single("file"), (req, res) => {
+//   const params = getStartParamsFromRequest(req, "service");
+//   runTestForService(
+//     {
+//       ...params,
+//     },
+//     (data) => {
+//       res.send(data);
+//     }
+//   );
+// });
 
 module.exports = router;

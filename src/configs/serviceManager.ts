@@ -1,9 +1,9 @@
-import SERVICES from "utils/services";
+import SERVICES from "../utils/services";
 import {
   AllServicesType,
   ServiceNameType,
   ServiceScenarioType,
-} from "utils/types";
+} from "../utils/types";
 
 class ServiceManager {
   services: AllServicesType;

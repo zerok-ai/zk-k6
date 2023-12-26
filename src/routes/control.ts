@@ -1,9 +1,9 @@
 import express, { Request, Response } from "express";
 const pkill = require("pkill");
-import controlManager from "configs/k6ControlManager";
-import serviceManager from "configs/serviceManager";
-import { ServiceNameType } from "utils/types";
-import { scenarioCheck } from "utils/middleware";
+import controlManager from "../configs/k6ControlManager";
+import serviceManager from "../configs/serviceManager";
+import { ServiceNameType } from "../utils/types";
+import { scenarioCheck } from "../utils/middleware";
 
 const fs = require("fs");
 const { scaleK6, status } = require("../utils/k6ControlFunctions.js");
@@ -126,4 +126,4 @@ router.get("/status/:service/:scenario", scenarioCheck, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

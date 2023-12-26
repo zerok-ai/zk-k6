@@ -9,7 +9,7 @@ export const DEFAULT_PARAMS = {
   MAX_VUS: 1000,
   RATE: 220,
   STAGES: "1_300-1_400",
-  DURATION: "5s",
+  DURATION: "10s",
   TIMEUNIT: "1m",
   CONCURRENCY: "",
   TEST_TAG: "none",

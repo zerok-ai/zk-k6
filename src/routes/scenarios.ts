@@ -1,7 +1,7 @@
 import express from "express";
 import fs from "fs";
 import path from "path";
-import { getContentType } from "utils/functions";
+import { getContentType } from "../utils/functions";
 const router = express.Router();
 
 const FOLDER_TO_SERVE = path.join(__dirname, "../runs");

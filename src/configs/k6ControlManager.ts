@@ -1,5 +1,10 @@
-import { pauseK6, resumeK6, scaleK6, status } from "utils/k6ControlFunctions";
-import { CallbackStatusType, ServiceNameType } from "utils/types";
+import {
+  pauseK6,
+  resumeK6,
+  scaleK6,
+  status,
+} from "../utils/k6ControlFunctions";
+import { CallbackStatusType, ServiceNameType } from "../utils/types";
 
 class K6ControlManager {
   isPaused: boolean;

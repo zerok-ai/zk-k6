@@ -1,8 +1,8 @@
-import serviceManager from "configs/serviceManager";
+import serviceManager from "../configs/serviceManager";
 import express from "express";
-import { getStartParamsFromRequest } from "utils/functions";
-import { startScenario } from "utils/startk6";
-import { GenericObject, K6ParamsType, ServiceNameType } from "utils/types";
+import { getStartParamsFromRequest } from "../utils/functions";
+import { startScenario } from "../utils/startk6";
+import { GenericObject, K6ParamsType, ServiceNameType } from "../utils/types";
 
 const router = express.Router();
 

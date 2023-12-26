@@ -1,6 +1,6 @@
 const { DEFAULT_PARAMS } = require("./constants");
 import { Request } from "express";
-import { K6ParamsType, ServiceNameType } from "utils/types";
+import { K6ParamsType, ServiceNameType } from "../utils/types";
 
 export const getStartParamsFromRequest = (req: Request, type = "service") => {
   const service = req.params.service as ServiceNameType;
