@@ -2,14 +2,11 @@ import express, { Request, Response } from "express";
 const pkill = require("pkill");
 import controlManager from "configs/k6ControlManager";
 import serviceManager from "configs/serviceManager";
+import { ServiceNameType } from "utils/types";
+import { scenarioCheck } from "utils/middleware";
 
 const fs = require("fs");
-const {
-  pauseK6,
-  resumeK6,
-  scaleK6,
-  status,
-} = require("../utils/k6ControlFunctions.js");
+const { scaleK6, status } = require("../utils/k6ControlFunctions.js");
 const router = express.Router();
 
 let running = false;
@@ -20,9 +17,20 @@ console.log(controlManager.isK6Running());
 /* 
     Pauses k6 process
 */
-router.get("/pause", async (req, res) => {
+router.get("/:service/:scenario/pause", scenarioCheck, async (req, res) => {
   try {
-    return res.send(await controlManager.pauseTests());
+    const service = req.params.service as ServiceNameType;
+    const scenario = req.params.scenario;
+    if (!serviceManager.isRunning(service, scenario)) {
+      return res.status(400).send({
+        message: "Scenario is not running",
+      });
+    }
+    const status = await controlManager.pauseTests();
+    if (status.status === 200) {
+      serviceManager.addPaused(service, scenario);
+    }
+    return res.send(status);
   } catch (error) {
     return res.status(500).send({
       err: error,
@@ -31,9 +39,15 @@ router.get("/pause", async (req, res) => {
 });
 
 // Resume k6 process
-router.get("/resume", async (req, res) => {
+router.get("/:service/:scenario/resume", async (req, res) => {
   try {
-    return res.send(await controlManager.resumeTests());
+    const service = req.params.service as ServiceNameType;
+    const scenario = req.params.scenario;
+    const status = await controlManager.resumeTests();
+    if (status.status === 200) {
+      serviceManager.addRunning(service, scenario);
+    }
+    return res.send(status);
   } catch (error) {
     return res.send(error);
   }
@@ -41,46 +55,47 @@ router.get("/resume", async (req, res) => {
 
 // Reset k6 process
 
-router.get("/reset", (req, res) => {
-  serviceManager.markAllAsPaused();
-  pkill.full("k6");
-  fs.readdir("./", (err, files) => {
-    files.forEach((file) => {
-      if (file.startsWith("lastrun-")) {
-        fs.unlinkSync(file);
-      }
+router.get("/reset", (_, res) => {
+  try {
+    pkill.full("k6");
+    serviceManager.reset();
+    controlManager.reset();
+    fs.readdir("./", (err: NodeJS.ErrnoException | null, files: string[]) => {
+      files.forEach((file) => {
+        if (file.startsWith("lastrun-")) {
+          fs.unlinkSync(file);
+        }
+      });
+      res.send({
+        message: "Reset done, last run files deleted",
+      });
     });
-    res.send({
-      message: "Reset done, last run files deleted",
+  } catch (err) {
+    res.status(500).send({
+      err,
     });
-  });
-});
-
-router.get("/mark-closed/:service", (req, res) => {
-  const service = req.params.service;
-  serviceManager.markRunning(service, false);
-  res.send("Marked for service " + service);
+  }
 });
 
 router.get("/scale", (req, res) => {
   const queryParams = req.query;
-  const newVUs = queryParams.vus;
-
-  if (!newVUs || newVUs === 0) {
+  const newVUs = queryParams.vus as string;
+  // check if vus is a valid number
+  if (!newVUs || isNaN(parseInt(newVUs)) || parseInt(newVUs) <= 0) {
     res.status(400).send({
       message: "Invalid inputs",
     });
     return;
   }
 
-  if (!running) {
+  if (!controlManager.isK6Running()) {
     res.send({
       message: "No tests are running. Nothing to scale!",
     });
     return;
   }
   try {
-    scaleK6(newVUs);
+    controlManager.scaleTests(parseInt(newVUs));
     res.send({
       message: `Scaled to ${newVUs} VUs`,
     });
@@ -92,19 +107,23 @@ router.get("/scale", (req, res) => {
   }
 });
 
-router.get("/status/:service", (req, res) => {
-  const service = req.params.service;
-  const scenario = req.query.scenario;
+router.get("/status/:service/:scenario", scenarioCheck, async (req, res) => {
+  const service = req.params.service as ServiceNameType;
+  const scenario = req.query.scenario as string;
   console.log("status/service - " + service);
-  const isScenarioValid = serviceManager.isValidScenario(service, scenario);
-  if (!isScenarioValid) {
-    res.status(400).send({
-      message: "Invalid service",
+  try {
+    const status = await controlManager.getK6Status(service, scenario);
+    if (status.status === 200) {
+      res.set("Content-Type", "text/html");
+      return res.send(Buffer.from(status.data as string));
+    }
+    return res.send(status);
+  } catch (err) {
+    res.status(500).send({
+      err,
+      message: "Error occured while getting status",
     });
-    return;
   }
-
-  status(service, (data) => res.send(data.toString()));
 });
 
 module.exports = router;

@@ -1,15 +1,18 @@
-import { AllServicesType, ServiceNameType } from "utils/types";
-
-const { SERVICES, POSSIBLE_SERVICES } = require("./resolver");
+import SERVICES from "utils/services";
+import {
+  AllServicesType,
+  ServiceNameType,
+  ServiceScenarioType,
+} from "utils/types";
 
 class ServiceManager {
   services: AllServicesType;
-  possibleServices: ServiceNameType[];
-  runningServices: ServiceNameType[] = [];
+  runningServices: ServiceScenarioType;
+  pausedServices: ServiceScenarioType;
   constructor() {
     this.services = SERVICES;
-    this.possibleServices = POSSIBLE_SERVICES;
-    this.runningServices = [];
+    this.runningServices = {} as ServiceScenarioType;
+    this.pausedServices = {} as ServiceScenarioType;
   }
 
   // check if service is valid
@@ -29,24 +32,16 @@ class ServiceManager {
     return false;
   }
 
-  // add to running services
-  addToRunningServices(serviceName: ServiceNameType) {
-    if (
-      this.isValidService(serviceName) &&
-      !this.isRunning(serviceName) &&
-      !this.runningServices.includes(serviceName)
-    ) {
-      this.runningServices.push(serviceName);
-    }
+  // pause all services
+  pauseAllServices() {
+    this.pausedServices = { ...this.pausedServices, ...this.runningServices };
+    this.runningServices = {} as ServiceScenarioType;
   }
 
-  // remove from running services
-  removeFromRunningServices(serviceName: ServiceNameType) {
-    if (this.isValidService(serviceName)) {
-      this.runningServices = this.runningServices.filter(
-        (service) => service !== serviceName
-      );
-    }
+  // resume all services
+  resumeAllServices() {
+    this.runningServices = { ...this.runningServices, ...this.pausedServices };
+    this.pausedServices = {} as ServiceScenarioType;
   }
 
   // get host
@@ -76,19 +71,73 @@ class ServiceManager {
   }
 
   // get service status
-  isRunning(serviceName: ServiceNameType) {
+  isRunning(svc: ServiceNameType, scenario: string) {
     return (
-      this.isValidService(serviceName) &&
-      this.runningServices.includes(serviceName)
+      this.runningServices[svc] && this.runningServices[svc].includes(scenario)
     );
   }
 
-  // mark service as running
-  // markAllAsPaused() {
-  //   for (let i = 0; i < this.possibleServices.length; i++) {
-  //     this.services[this.possibleServices[i]].isRunning = false;
-  //   }
-  // }
+  // get paused status
+  isPaused(svc: ServiceNameType, scenario: string) {
+    return (
+      this.pausedServices[svc] && this.pausedServices[svc].includes(scenario)
+    );
+  }
+
+  // remove from paused services
+  removeFromPaused(svc: ServiceNameType, scenario: string) {
+    if (this.isValidScenario(svc, scenario)) {
+      if (!this.pausedServices[svc]) {
+        this.pausedServices[svc] = [];
+        return;
+      }
+      this.pausedServices[svc] = this.pausedServices[svc].filter(
+        (sc) => sc !== scenario
+      );
+    }
+  }
+
+  // remove from running services
+  removeFromRunning(svc: ServiceNameType, scenario: string) {
+    if (!this.runningServices[svc]) {
+      this.runningServices[svc] = [];
+      return;
+    }
+    this.runningServices[svc] = this.runningServices[svc].filter(
+      (sc) => sc !== scenario
+    );
+  }
+
+  // add scenario
+  addRunning(svc: ServiceNameType, scenario: string) {
+    if (this.isPaused(svc, scenario)) {
+      this.removeFromPaused(svc, scenario);
+    }
+    if (!this.runningServices[svc]) {
+      this.runningServices[svc] = [];
+    }
+    // to avoid duplicates
+    const scenarios = Array.from(
+      new Set([...this.runningServices[svc], scenario])
+    );
+    this.runningServices[svc] = scenarios;
+  }
+
+  // add paused
+  addPaused(svc: ServiceNameType, scenario: string) {
+    if (this.isRunning(svc, scenario)) {
+      this.removeFromRunning(svc, scenario);
+    }
+    if (!this.pausedServices[svc]) {
+      this.pausedServices[svc] = [];
+    }
+    this.pausedServices[svc].push(scenario);
+  }
+
+  reset() {
+    this.runningServices = {} as ServiceScenarioType;
+    this.pausedServices = {} as ServiceScenarioType;
+  }
 }
 const serviceManager = new ServiceManager();
 

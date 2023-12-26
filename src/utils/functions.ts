@@ -3,7 +3,8 @@ import { Request } from "express";
 import { K6ParamsType, ServiceNameType } from "utils/types";
 
 export const getStartParamsFromRequest = (req: Request, type = "service") => {
-  const service = (req.params.service as ServiceNameType) ?? null;
+  const service = req.params.service as ServiceNameType;
+  const scenario = req.params.scenario;
   const qp = req.query;
   const {
     mvus,
@@ -14,7 +15,6 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     timeunit,
     concurrency,
     tag,
-    scenario,
   } = qp;
   const params: K6ParamsType = {
     initialVUs: checkIfNumber(initialVUs) ?? DEFAULT_PARAMS.INITIAL_VUS,

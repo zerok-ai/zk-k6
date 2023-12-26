@@ -31,3 +31,7 @@ export interface K6ParamsType {
   scenario: string;
   service?: ServiceNameType;
 }
+
+export type ServiceScenarioType = {
+  [key in ServiceNameType]: string[];
+};

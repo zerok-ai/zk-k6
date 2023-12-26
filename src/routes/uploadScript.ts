@@ -6,8 +6,8 @@ import upload from "utils/storage";
 const router = express.Router();
 
 router.post("/upload", upload.single("file"), (req: Request, res) => {
-  // @ts-expect-error - file is not defined in Request type
   const file = req.file;
+  // @ts-expect-error - file is not defined in Request type
   const absolutePath = path.resolve(file.path);
   res.send({
     message: "File uploaded successfully",
@@ -16,8 +16,6 @@ router.post("/upload", upload.single("file"), (req: Request, res) => {
 });
 
 router.post("/start/:service", upload.single("file"), (req, res) => {
-  // @ts-expect-error - file is not defined in Request type
-  const file = req.file;
   const params = getStartParamsFromRequest(req, "service");
   runTestForService(
     {

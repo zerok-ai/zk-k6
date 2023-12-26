@@ -3,14 +3,13 @@ import express from "express";
 // ROUTES
 import deleteRoutes from "./routes/delete";
 import startRoutes from "./routes/start";
-import uploadRoutes from "./routes/uploadScript";
 import controlRoutes from "./routes/control";
 import scenariosRoutes from "./routes/scenarios";
+import { APP_PORT } from "utils/constants";
 
 const app = express();
 
-// PORT
-const { APP_PORT } = require("./configs/resolver");
+// ------------------ CONFIG ------------------
 
 // ------------------ DELETE ROUTES ------------------
 
