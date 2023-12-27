@@ -7,8 +7,8 @@ export const scenarioCheck = (
   res: Response,
   next: NextFunction
 ) => {
-  const scenario = req.params.scenario;
-  const service = req.params.service;
+  const scenario = req.query.scenario;
+  const service = req.query.service;
 
   if (
     !serviceManager.isValidScenario(

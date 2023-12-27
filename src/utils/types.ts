@@ -35,3 +35,8 @@ export interface K6ParamsType {
 export type ServiceScenarioType = {
   [key in ServiceNameType]: string[];
 };
+
+export type K6Stage = {
+  duration: string;
+  target: number;
+};

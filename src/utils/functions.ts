@@ -6,8 +6,8 @@ import { K6ParamsType, ServiceNameType } from "../utils/types";
 import dayjs from "dayjs";
 
 export const getStartParamsFromRequest = (req: Request, type = "service") => {
-  const service = req.params.service as ServiceNameType;
-  const scenario = req.params.scenario;
+  const service = req.query.service as ServiceNameType;
+  const scenario = req.query.scenario;
   const qp = req.query;
   const {
     mvus,
@@ -110,4 +110,17 @@ export const getRunFromFileName = (fileName: string) => {
     console.error(`Error reading file: ${filePath}`, error);
     throw "Error reading file";
   }
+};
+
+export const parseStages = (stages: string) => {
+  // stages are in the form [duration1]_[targetVUs1]-[duration2]_[targetVUs2]
+  const stagesArray = stages.split("-");
+  const parsedStages = stagesArray.map((stage) => {
+    const [duration, targetVUs] = stage.split("_");
+    return {
+      duration,
+      target: checkIfNumber(targetVUs) ?? (DEFAULT_PARAMS.MAX_VUS as number),
+    };
+  });
+  return parsedStages;
 };
