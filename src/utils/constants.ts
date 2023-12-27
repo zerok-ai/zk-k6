@@ -10,7 +10,7 @@ export const DEFAULT_PARAMS = {
   RATE: 220,
   STAGES: "1_300-1_400",
   DURATION: "10s",
-  TIMEUNIT: "1m",
+  TIMEUNIT: "5m",
   CONCURRENCY: "",
   TEST_TAG: "none",
 };
@@ -18,5 +18,5 @@ export const DEFAULT_PARAMS = {
 export const APP_PORT = 8000;
 
 export const DEFAULT_PROM_URL =
-  "https://prom.loadclient03.getanton.com/api/v1/write";
+  "http://prom.loadclient03.getanton.com/api/v1/write";
 export const DEFAULT_K6_URL = "http://localhost:8000";

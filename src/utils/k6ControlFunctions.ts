@@ -2,22 +2,20 @@ import { ExecException } from "child_process";
 import { ServiceNameType } from "./types";
 
 const execute = require("child_process").exec;
-const fs = require("fs");
+import { promises as fs } from "fs";
 
 export async function pauseK6() {
   try {
-    // const passwdContent = await execute("cat /etc/passwd");
     execute(
-      "sh ../core/pause_xk6.sh",
+      `${__dirname}/../core/k6 pause`,
       (err: ExecException, stdout: string, stderr: string) => {
-        console.log(err, stdout, stderr);
         if (err != null) {
           throw "Error pausing tests";
         }
       }
     );
   } catch (error) {
-    console.log({ error });
+    console.log({ error }, "HEY");
     throw "Error pausing tests";
   }
 }
@@ -58,16 +56,18 @@ export async function scaleK6(newVUs: number) {
   }
 }
 
-export async function status(
+export async function getLastLog(
   service: ServiceNameType,
   scenario: string
 ): Promise<string> {
   try {
-    const data = await fs.readFile(`./lastrun-${service}-${scenario}.log`);
-    const content = data.toString();
+    const filePath = `../lastrun-${service}-${scenario}.log`;
+    const dataBuffer = await fs.readFile(__dirname + "/" + filePath);
+    const content = dataBuffer.toString("utf-8"); // Convert buffer to string
     const template = `<html><body><pre>${content}</pre></body></html>`;
     return template;
   } catch (err) {
+    console.error({ err });
     const content = `No status available ${err}`;
     const template = `<html><body><pre>${content}</pre></body></html>`;
     return template;
