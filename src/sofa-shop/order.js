@@ -1,15 +1,22 @@
-import { sleep, check } from "k6";
+import { sleep } from "k6";
 import http from "k6/http";
 import { getCurrentStageIndex } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import ScenarioRunner from "../configs/scenarioRunner.js";
 import { getParams } from "./functions.js";
-import { INVENTORY_ALL_API_PATH } from "./constants.js";
+import {
+  INVENTORY_SKU_INFO,
+  ORDER_ERROR_MESSAGE,
+  ORDER_API_PATH,
+  ORDER_ERROR_STATUS,
+  ORDER_SKU_INFO,
+  INVENTORY_POST_API_PATH,
+} from "./constants.js";
 
 const scenarioRunner = new ScenarioRunner();
 
 const service = {
-  name: "sofa-shop-inventory",
-  exec: "inventory",
+  name: "sofa-shop-order",
+  exec: "order",
   host: "sofa-shop.mysql.loadclient03.getanton.com",
 };
 
@@ -17,9 +24,9 @@ const service = {
 export const options = {
   discardResponseBodies: true,
   scenarios: {
-    "sofa-shop-inventory": {
+    "sofa-shop-order": {
       executor: "ramping-arrival-rate",
-      exec: "inventory",
+      exec: "order",
       timeUnit: scenarioRunner.timeUnit,
       preAllocatedVUs: scenarioRunner.initialVUs,
       maxVUs: scenarioRunner.maxVUs,
@@ -29,21 +36,34 @@ export const options = {
   },
 };
 
-export function inventory() {
+export function order() {
   const stageIndex = getCurrentStageIndex();
   const limits = scenarioRunner.getLimits();
   const params = getParams(stageIndex, limits, scenarioRunner);
   const baseUrl = `https://${service.host}`;
-  const endpoint = `${baseUrl}${INVENTORY_ALL_API_PATH}`;
-  const res = http.get(endpoint, params);
-  // Check for success
-  check(res, {
-    "is status 200": (r) => r.status === 200,
-  });
+
+  const postBody = {
+    orderLineItemDtoList: [ORDER_SKU_INFO],
+  };
+  const postUrl = `${baseUrl}${ORDER_API_PATH}`;
+  const resp = http.post(postUrl, JSON.stringify(postBody), params);
+  if (
+    resp.status == ORDER_ERROR_STATUS &&
+    resp.json().trace.includes(ORDER_ERROR_MESSAGE)
+  ) {
+    // console.log("FAILED ORDER");
+    const putUrl = `${baseUrl}${INVENTORY_POST_API_PATH}`;
+    const params = getParams(stageIndex, limits, scenarioRunner, false);
+    const putResp = http.put(
+      putUrl,
+      JSON.stringify(INVENTORY_SKU_INFO),
+      params
+    );
+  } else {
+    // console.log("SUCCESSFUL ORDER");
+  }
   sleep(0.5);
 }
-
-// export default inventory;
 
 // export function teardown(data) {
 //   teardownToBeExported(scenarioRunner);

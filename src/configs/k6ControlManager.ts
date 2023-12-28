@@ -1,8 +1,8 @@
 import {
+  getLastLog,
   pauseK6,
   resumeK6,
   scaleK6,
-  status,
 } from "../utils/k6ControlFunctions";
 import { CallbackStatusType, ServiceNameType } from "../utils/types";
 
@@ -12,6 +12,9 @@ class K6ControlManager {
   constructor() {
     this.isPaused = false;
     this.isRunning = false;
+  }
+  markRunning(val: boolean) {
+    this.isRunning = val;
   }
   isK6Running() {
     return this.isRunning;
@@ -88,7 +91,7 @@ class K6ControlManager {
   }
 
   //    status k6
-  async getK6Status(
+  async getLastRunLog(
     service: ServiceNameType,
     scenario: string
   ): Promise<CallbackStatusType> {
@@ -99,13 +102,14 @@ class K6ControlManager {
       };
     }
     try {
-      const content = await status(service, scenario);
+      const content = await getLastLog(service, scenario);
       return {
         message: "Status fetched",
         status: 200,
         data: content,
       };
     } catch (error) {
+      console.log({ error });
       throw error;
     }
   }

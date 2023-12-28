@@ -65,6 +65,16 @@ class ServiceManager {
     return this.services;
   }
 
+  // get running services
+  getRunningServices() {
+    return this.runningServices;
+  }
+
+  // get paused services
+  getPausedServices() {
+    return this.pausedServices;
+  }
+
   // get possible services
   getPossibleServices() {
     return Object.keys(this.services);
@@ -75,6 +85,11 @@ class ServiceManager {
     return (
       this.runningServices[svc] && this.runningServices[svc].includes(scenario)
     );
+  }
+
+  // is any service running
+  isAnyServiceRunning() {
+    return Object.keys(this.runningServices).length > 0;
   }
 
   // get paused status

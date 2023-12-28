@@ -1,23 +1,16 @@
 import serviceManager from "../configs/serviceManager";
 import express from "express";
 import { getStartParamsFromRequest } from "../utils/functions";
-import { startScenario } from "../utils/startk6";
 import { GenericObject, K6ParamsType, ServiceNameType } from "../utils/types";
+import { startScenario } from "../startk6";
+import { scenarioCheck } from "../utils/middleware";
 
 const router = express.Router();
 
-const serviceParamToServiceMap: GenericObject = {
-  sapp: "app",
-  ssofa: "sofa_shop",
-  szk: "zk",
-  ssoak: "zk_soak",
-  sspill: "zk_spill",
-};
-
 // Start load test for a service
-router.get("/:service/:scenario/start", (req, res) => {
-  const service = req.params.service as ServiceNameType;
-  const scenario = req.params.scenario;
+router.get("/start", scenarioCheck, async (req, res) => {
+  const service = req.query.service as ServiceNameType;
+  const scenario = req.query.scenario;
   if (!serviceManager.isValidScenario(service, scenario as string)) {
     return res.status(400).send({
       message: "Invalid service and/or scenario",
@@ -34,6 +27,7 @@ router.get("/:service/:scenario/start", (req, res) => {
       });
     });
   } catch (err) {
+    console.log({ err });
     return res.status(500).send({
       err,
     });
