@@ -4,6 +4,7 @@ import path from "path";
 import { Request } from "express";
 import { K6ParamsType, ServiceNameType } from "../utils/types";
 import dayjs from "dayjs";
+import { DEFAULT_PROM_URL } from "./constants";
 
 export const getStartParamsFromRequest = (req: Request, type = "service") => {
   const service = req.query.service as ServiceNameType;
@@ -123,4 +124,43 @@ export const parseStages = (stages: string) => {
     };
   });
   return parsedStages;
+};
+
+export const getK6Command = (params: K6ParamsType) => {
+  const PROM_URL = DEFAULT_PROM_URL;
+  const {
+    service,
+    scenario,
+    timeunit,
+    stages,
+    initialVUs,
+    maxVUs,
+    testTag,
+    k6Script,
+    rate,
+  } = params;
+  const dateString = getTestRunDateString();
+  const logFilePath = `./lastrun-${service}-${scenario}.log`;
+  const promUrl = `K6_PROMETHEUS_REMOTE_URL="${PROM_URL}"`;
+  const k6Binary = `./core/k6`;
+  const k6RunOptions = `--no-connection-reuse -o output-prometheus-remote`;
+  const k6EnvMap = {
+    SERVICE: service,
+    TIMEUNIT: timeunit,
+    STAGES: stages,
+    RATE: rate,
+    INITIAL_VUS: initialVUs,
+    MAX_VUS: maxVUs,
+    SCENARIO: `${service}-${scenario}`,
+    TEST_TAG: testTag,
+  };
+  const k6Env = Object.entries(k6EnvMap)
+    .map(([key, value]) => `-e ${key}="${value}"`)
+    .join(" ");
+  let command = `ulimit -n 65536;
+          ${promUrl} \ \
+          ${k6Binary} run ${k6RunOptions} \
+          ${k6Env} \
+          "${k6Script}"  2>&1 | tee "${logFilePath}" `;
+  return command;
 };

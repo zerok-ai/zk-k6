@@ -33,6 +33,7 @@ export interface K6ParamsType {
 }
 
 export type ServiceScenarioType = {
+  // @TODO - add type for scenario
   [key in ServiceNameType]: string[];
 };
 
