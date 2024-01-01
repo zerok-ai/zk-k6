@@ -13,6 +13,9 @@ export const DEFAULT_PARAMS = {
   TIMEUNIT: "5m",
   CONCURRENCY: "",
   TEST_TAG: "none",
+  RNDLIMIT: 0,
+  RNDON: false,
+  RNDMEMON: false,
 };
 
 export const APP_PORT = 8000;

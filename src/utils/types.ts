@@ -30,6 +30,9 @@ export interface K6ParamsType {
   k6Script: string;
   scenario: string;
   service?: ServiceNameType;
+  rndon: boolean;
+  rndmemon: boolean;
+  rndlimit: number;
 }
 
 export type ServiceScenarioType = {

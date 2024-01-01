@@ -55,6 +55,9 @@ export default class ScenarioRunner {
         : DEFAULT_PARAMS.TIMEUNIT;
     this.testTag =
       typeof __ENV.TEST_TAG !== "undefined" ? __ENV.TEST_TAG : null;
+    this.rndon = __ENV.RNDON;
+    this.rndlimit = __ENV.RNDLIMIT;
+    this.rndmemon = __ENV.RNDMEMON;
   }
   getStages() {
     return this.stages;

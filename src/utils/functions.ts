@@ -19,6 +19,9 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     timeunit,
     concurrency,
     tag,
+    rndlimit,
+    rndon,
+    rndmemon,
   } = qp;
   const params: K6ParamsType = {
     initialVUs: checkIfNumber(initialVUs) ?? DEFAULT_PARAMS.INITIAL_VUS,
@@ -31,6 +34,9 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     testTag: tag ?? DEFAULT_PARAMS.TEST_TAG,
     k6Script: `./${service}/${scenario}.js`,
     scenario: scenario as string,
+    rndlimit: checkIfNumber(rndlimit) ?? DEFAULT_PARAMS.RNDLIMIT,
+    rndon: rndon === "true" ?? DEFAULT_PARAMS.RNDON,
+    rndmemon: rndmemon === "true" ?? DEFAULT_PARAMS.RNDMEMON,
   };
   switch (type) {
     case "service":
@@ -138,6 +144,9 @@ export const getK6Command = (params: K6ParamsType) => {
     testTag,
     k6Script,
     rate,
+    rndlimit,
+    rndon,
+    rndmemon,
   } = params;
   const dateString = getTestRunDateString();
   const logFilePath = `./lastrun-${service}-${scenario}.log`;
@@ -153,6 +162,9 @@ export const getK6Command = (params: K6ParamsType) => {
     MAX_VUS: maxVUs,
     SCENARIO: `${service}-${scenario}`,
     TEST_TAG: testTag,
+    RNDLIMIT: rndlimit,
+    RNDON: rndon,
+    RNDMEMON: rndmemon,
   };
   const k6Env = Object.entries(k6EnvMap)
     .map(([key, value]) => `-e ${key}="${value}"`)

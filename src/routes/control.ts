@@ -7,6 +7,7 @@ import { scenarioCheck } from "../utils/middleware";
 import { getFileNamesFromFolder, getRunFromFileName } from "../utils/functions";
 
 import fs from "fs";
+import path from "path";
 const router = express.Router();
 
 // /*
@@ -173,6 +174,8 @@ router.get("/runs/:run", async (req, res) => {
     });
   }
 });
+
+
 
 
 export default router;

@@ -33,7 +33,7 @@ export function inventory() {
   const stageIndex = getCurrentStageIndex();
   const limits = scenarioRunner.getLimits();
   const params = getParams(stageIndex, limits, scenarioRunner);
-  const baseUrl = `https://${service.host}`;
+  const baseUrl = `https://${service.host}?rndon=${scenarioRunner.rndon}&rndlimit=${scenarioRunner.rndlimit}&rndmemon=${scenarioRunner.rndmemon}`;
   const endpoint = `${baseUrl}${INVENTORY_ALL_API_PATH}`;
   const res = http.get(endpoint, params);
   // Check for success

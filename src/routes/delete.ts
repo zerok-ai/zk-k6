@@ -1,25 +1,26 @@
 import fs from "fs";
 import express from "express";
-
-import { DELETE_TEMP_FILES_ROUTE, TEMP_FILE_PREFIX } from "../utils/constants";
+import { getFileNamesFromFolder } from "../utils/functions";
+import path from "path";
 
 const router = express.Router();
 
-// Delete all temp files marked with TEMP_FILE_PREFIX
-router.delete(DELETE_TEMP_FILES_ROUTE, (req, res) => {
+// purge all runs
+router.delete("/runs/purge", async (_, res) => {
   try {
-    fs.readdir("../", (err, files) => {
-      files.forEach((file) => {
-        if (file.startsWith(TEMP_FILE_PREFIX)) {
-          fs.unlinkSync(file);
-        }
-      });
-      res.send({
-        message: "Temporary files deleted",
+    const files = await getFileNamesFromFolder("../runs");
+    files.forEach((file) => {
+      fs.unlink(path.join(__dirname, "../runs", file), () => {
+        console.log("deleted file");
       });
     });
-  } catch (err) {
-    res.status(500).send({ error: err });
+    return res.status(200).send({
+      message: "All runs purged, log files deleted",
+    });
+  } catch {
+    return res.status(500).send({
+      message: "Error purging runs",
+    });
   }
 });
 
