@@ -4,6 +4,7 @@ import { ServiceNameType } from "./types";
 const execute = require("child_process").exec;
 import { promises as fs } from "fs";
 
+// unused right now
 export async function pauseK6() {
   try {
     execute(
@@ -15,12 +16,13 @@ export async function pauseK6() {
       }
     );
   } catch (error) {
-    console.log({ error }, "HEY");
+    console.log({ error });
     throw "Error pausing tests";
   }
 }
 
-export async function resumeK6() {
+// unused right now
+export default async function resumeK6() {
   try {
     console.log("Resuming Tests");
     // const passwdContent = await execute("cat /etc/passwd");
@@ -38,6 +40,7 @@ export async function resumeK6() {
   }
 }
 
+// unused right now
 export async function scaleK6(newVUs: number) {
   try {
     console.log("Scaling Tests with new VUs: " + newVUs);

@@ -10,7 +10,7 @@ const scenarioRunner = new ScenarioRunner();
 const service = {
   name: "sofa-shop-inventory",
   exec: "inventory",
-  host: "sofa-shop.mysql.loadclient03.getanton.com",
+  host: "sofa-shop.mysql.devclient03.getanton.com",
 };
 
 //k6 const to be exported
@@ -33,8 +33,9 @@ export function inventory() {
   const stageIndex = getCurrentStageIndex();
   const limits = scenarioRunner.getLimits();
   const params = getParams(stageIndex, limits, scenarioRunner);
-  const baseUrl = `https://${service.host}?rndon=${scenarioRunner.rndon}&rndlimit=${scenarioRunner.rndlimit}&rndmemon=${scenarioRunner.rndmemon}`;
-  const endpoint = `${baseUrl}${INVENTORY_ALL_API_PATH}`;
+  const queryparams = `?rndon=${scenarioRunner.rndon}&rndlimit=${scenarioRunner.rndlimit}&rndmemon=${scenarioRunner.rndmemon}`;
+  const endpoint = `https://${service.host}${INVENTORY_ALL_API_PATH}${queryparams}`;
+
   const res = http.get(endpoint, params);
   // Check for success
   check(res, {
@@ -42,9 +43,3 @@ export function inventory() {
   });
   sleep(0.5);
 }
-
-// export default inventory;
-
-// export function teardown(data) {
-//   teardownToBeExported(scenarioRunner);
-// }

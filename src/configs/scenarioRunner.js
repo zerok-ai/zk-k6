@@ -1,7 +1,3 @@
-// import { K6Stage } from "utils/types.js";
-// import { DEFAULT_PARAMS } from "../utils/constants";
-// import { parseStages } from "../utils/functions";
-
 const DEFAULT_PARAMS = {
   INITIAL_VUS: 1000,
   MAX_VUS: 1000,

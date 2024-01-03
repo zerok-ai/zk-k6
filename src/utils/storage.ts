@@ -1,6 +1,8 @@
 import multer from "multer";
 import path from "path";
 const { TEMP_FILE_PREFIX } = require("./constants");
+
+// not used right now
 const storage = multer.diskStorage({
   destination: "../",
   filename: function (req, file, callback) {

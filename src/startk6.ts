@@ -29,7 +29,7 @@ export async function startK6(params: K6ParamsType) {
           controlManager.markRunning(false);
         }
         copyToLogFolder(service, scenario);
-        if (err != null) {
+        if (err) {
           console.log("Error occurred while running", err);
         } else {
           console.log("Run completed");
@@ -38,7 +38,7 @@ export async function startK6(params: K6ParamsType) {
       }
     );
   } catch (error: any) {
-    serviceManager.removeFromRunning(service, scenario); 
+    serviceManager.removeFromRunning(service, scenario);
     // if no other services are running, mark the runner as not running
     if (!serviceManager.isAnyServiceRunning()) {
       controlManager.markRunning(false);

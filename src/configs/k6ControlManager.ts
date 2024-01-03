@@ -1,7 +1,6 @@
-import {
+import resumeK6, {
   getLastLog,
   pauseK6,
-  resumeK6,
   scaleK6,
 } from "../utils/k6ControlFunctions";
 import { CallbackStatusType, ServiceNameType } from "../utils/types";
