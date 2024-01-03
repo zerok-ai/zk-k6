@@ -1,15 +1,17 @@
 // express
 import express from "express";
+import cors from "cors";
 // ROUTES
 import deleteRoutes from "./routes/delete";
 import startRoutes from "./routes/start";
 import controlRoutes from "./routes/control";
-import scenariosRoutes from "./routes/scenarios";
+import serviceRoutes from "./routes/services";
 import { APP_PORT } from "./utils/constants";
 
+// ------------------ CONFIG ------------------
 const app = express();
 
-// ------------------ CONFIG ------------------
+app.use(cors());
 
 // ------------------ DELETE ROUTES ------------------
 
@@ -22,36 +24,28 @@ app.use(deleteRoutes);
 
 /*
  * /start/:service - Starts a test for a service
- * /start-concurrent-tests - Starts concurrent tests for all services
  */
 app.use(startRoutes);
-
-// ------------------ UPLOAD ROUTES ------------------
-
-/*
- * /upload - Uploads the script file to the storage from multer
- * /start/:service (POST) - Starts a test for a service with the latest uploaded script file
- */
-// app.use(uploadRoutes);
 
 // ------------------ CONTROL ROUTES ------------------
 
 /*
- * /pause - Pauses all tests
- * /resume - Resumes all tests
+//  * /pause - Pauses all tests
+//  * /resume - Resumes all tests
  * /reset - Resets all tests
- * /mark-closed/:service - Marks a service as closed
- * /scale - Scales all running tests
- * /status/:service - Gets the status of a service
+//  * /scale - Scales all running tests
+ * /status - Gets the status of k6
+ * /purge - Purges all tests
+ * /runs - Gets the list of runs
+ * /runs/:run - Gets the run
  */
 app.use(controlRoutes);
 
-// ------------------ SCENARIOS ROUTES ------------------
+// --------------------- SERVICES ---------------------
 /*
- * /list/:scenario - Lists all runs for a scenario
- * /fetch/:scenario/:run - Fetches the run file for a scenario
+ * /services/list - Gets the list of services
  */
-app.use(scenariosRoutes);
+app.use(serviceRoutes);
 
 // Start server
 app.listen(APP_PORT, () => {

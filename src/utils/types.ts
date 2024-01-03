@@ -4,7 +4,6 @@ export type ServiceNameType = (typeof SERVICES)[number];
 
 export type ServiceType = {
   name: ServiceNameType;
-  host: string;
   scenarios: string[];
 };
 

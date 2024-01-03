@@ -44,14 +44,6 @@ class ServiceManager {
     this.pausedServices = {} as ServiceScenarioType;
   }
 
-  // get host
-  getHost(serviceName: ServiceNameType) {
-    if (this.isValidService(serviceName)) {
-      return this.services[serviceName].host;
-    }
-    return null;
-  }
-
   // get service
   getService(serviceName: ServiceNameType) {
     if (this.isValidService(serviceName)) {
