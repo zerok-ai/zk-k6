@@ -27,7 +27,7 @@ spec:
         effect: "NoSchedule"
       containers:
         - name: k6-load-generator
-          image: us-west1-docker.pkg.dev/zerok-dev/zk-commons/xk6:latest
+          image: us-west-1-docker.pkg.dev/zk-client/devclient03/zk-load-test:latest
           imagePullPolicy: Always
           ports:
           - name: m-http

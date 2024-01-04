@@ -19,6 +19,7 @@ export interface CallbackStatusType {
 
 export interface K6ParamsType {
   initialVUs: number;
+  host: string;
   maxVUs: number;
   rate: number;
   stages: string;
@@ -32,6 +33,8 @@ export interface K6ParamsType {
   rndon: boolean;
   rndmemon: boolean;
   rndlimit: number;
+  prom_host: string;
+  run_id: string;
 }
 
 export type ServiceScenarioType = {

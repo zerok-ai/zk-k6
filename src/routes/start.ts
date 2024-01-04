@@ -17,6 +17,12 @@ router.get("/start", scenarioCheck, async (req, res) => {
     });
   }
 
+  if (!req.query.host) {
+    return res.status(400).send({
+      message: "Host is required",
+    });
+  }
+
   const params = getStartParamsFromRequest(req, "service");
 
   try {

@@ -4,7 +4,7 @@ const DEFAULT_PARAMS = {
   RATE: 220,
   STAGES: "1_300-1_400",
   DURATION: "10s",
-  TIMEUNIT: "5m",
+  TIMEUNIT: "1s",
   CONCURRENCY: "",
   TEST_TAG: "none",
 };
@@ -28,29 +28,12 @@ const parseStages = (stages) => {
 };
 export default class ScenarioRunner {
   constructor() {
-    [this.stages, this.limits] = __ENV.STAGES
-      ? parseStages(__ENV.STAGES)
-      : DEFAULT_PARAMS.STAGES;
-    this.rate =
-      typeof __ENV.RATE !== "undefined" ? __ENV.RATE : DEFAULT_PARAMS.RATE;
-    this.maxVUs =
-      typeof __ENV.MAX_VUS !== "undefined"
-        ? __ENV.MAX_VUS
-        : DEFAULT_PARAMS.MAX_VUS;
-    this.initialVUs =
-      typeof __ENV.INITIAL_VUS !== "undefined"
-        ? __ENV.INITIAL_VUS
-        : DEFAULT_PARAMS.INITIAL_VUS;
-    this.duration =
-      typeof __ENV.DURATION !== "undefined"
-        ? __ENV.DURATION
-        : DEFAULT_PARAMS.DURATION;
-    this.timeunit =
-      typeof __ENV.TIMEUNIT !== "undefined"
-        ? __ENV.TIMEUNIT
-        : DEFAULT_PARAMS.TIMEUNIT;
-    this.testTag =
-      typeof __ENV.TEST_TAG !== "undefined" ? __ENV.TEST_TAG : null;
+    [this.stages, this.limits] = parseStages(__ENV.STAGES);
+    this.rate = __ENV.RATE;
+    this.maxVUs = __ENV.MAX_VUS;
+    this.initialVUs = __ENV.INITIAL_VUS;
+    this.host = __ENV.HOST;
+    this.timeunit = DEFAULT_PARAMS.TIMEUNIT;
     this.rndon = __ENV.RNDON;
     this.rndlimit = __ENV.RNDLIMIT;
     this.rndmemon = __ENV.RNDMEMON;

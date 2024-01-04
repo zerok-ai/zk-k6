@@ -1,14 +1,18 @@
-build:
-	./scripts/gcp-artifact-deploy.sh
+IMAGE_NAME = zk-load-test
+IMAGE_VERSION = latest
+LOCATION ?= us-west1
+PROJECT_ID ?= zerok-dev
+REPOSITORY ?= zk-client
 
-deploy:
-	./scripts/deploy.sh
+docker-build: 
+    docker build --no-cache $(DockerFile) -t $(IMAGE_PREFIX)$(IMAGE_NAME)$(IMAGE_NAME_SUFFIX):$(IMAGE_VERSION) .
 
-bdeploy:
-	./scripts/gcp-artifact-deploy.sh && ./scripts/deploy.sh
+docker-push:
+    docker push $(IMAGE_PREFIX)$(IMAGE_NAME)$(IMAGE_NAME_SUFFIX):$(IMAGE_VERSION)
 
-restart:
-	kubectl delete pods -l app=k6-load-generator -n k6
+docker-build-gke: IMAGE_PREFIX := $(LOCATION)-docker.pkg.dev/$(PROJECT_ID)/$(REPOSITORY)/
+docker-build-gke: DockerFile := -f DockerFile
+docker-build-gke: docker-build
 
-brestart:
-	./scripts/gcp-artifact-deploy.sh && kubectl delete pods -l app=k6-load-generator -n k6
+docker-push-gke: IMAGE_PREFIX := $(LOCATION)-docker.pkg.dev/$(PROJECT_ID)/$(REPOSITORY)/
+docker-push-gke: docker-push

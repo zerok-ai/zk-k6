@@ -12,9 +12,6 @@ function generateRandomHexString(length) {
 
 export function getParams(stageIndex, limits, runner, rateLimit = true) {
   const params = {
-    tags: {
-      run_id: runner.testTag,
-    },
     responseType: "text",
     headers: {},
   };

@@ -12,10 +12,10 @@ export const DEFAULT_PARAMS = {
   DURATION: "10s",
   TIMEUNIT: "5m",
   CONCURRENCY: "",
-  TEST_TAG: "none",
   RNDLIMIT: 0,
   RNDON: false,
   RNDMEMON: false,
+  RUN_ID: "none",
 };
 
 export const APP_PORT = 8000;

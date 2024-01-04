@@ -15,7 +15,7 @@ export async function startK6(params: K6ParamsType) {
   try {
     let command = getK6Command(params);
     controlManager.markRunning(true);
-    console.log("STARTING TESTS");
+    console.log("STARTING TESTS", params.run_id);
     execute(
       command,
       {
@@ -53,14 +53,6 @@ export async function startScenario(
 ) {
   const { scenario } = params;
   const service = params.service as ServiceNameType;
-  if (controlManager.isK6Paused()) {
-    callback({
-      message: "K6 is paused, no tests can run without resuming K6.",
-      status: 200,
-    });
-    return;
-  }
-
   // serviceManager.addService(service);
 
   if (serviceManager.isRunning(service, scenario)) {

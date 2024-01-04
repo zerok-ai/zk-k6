@@ -22,6 +22,9 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     rndlimit,
     rndon,
     rndmemon,
+    host,
+    prom_host,
+    run_id,
   } = qp;
   const params: K6ParamsType = {
     initialVUs: checkIfNumber(initialVUs) ?? DEFAULT_PARAMS.INITIAL_VUS,
@@ -37,6 +40,9 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     rndlimit: checkIfNumber(rndlimit) ?? DEFAULT_PARAMS.RNDLIMIT,
     rndon: rndon === "true" ?? DEFAULT_PARAMS.RNDON,
     rndmemon: rndmemon === "true" ?? DEFAULT_PARAMS.RNDMEMON,
+    host: host as string,
+    prom_host: prom_host as string,
+    run_id: run_id ?? DEFAULT_PARAMS.RUN_ID,
   };
   switch (type) {
     case "service":
@@ -133,7 +139,6 @@ export const parseStages = (stages: string) => {
 };
 
 export const getK6Command = (params: K6ParamsType) => {
-  const PROM_URL = DEFAULT_PROM_URL;
   const {
     service,
     scenario,
@@ -147,12 +152,15 @@ export const getK6Command = (params: K6ParamsType) => {
     rndlimit,
     rndon,
     rndmemon,
+    host,
+    prom_host,
+    run_id,
   } = params;
   const dateString = getTestRunDateString();
   const logFilePath = `./lastrun-${service}-${scenario}.log`;
-  const promUrl = `K6_PROMETHEUS_REMOTE_URL="${PROM_URL}"`;
+  const promUrl = `K6_PROMETHEUS_REMOTE_URL="${prom_host}/api/v1/write"`;
   const k6Binary = `./core/k6`;
-  const k6RunOptions = `--no-connection-reuse -o output-prometheus-remote`;
+  const k6RunOptions = `--no-connection-reuse --tag testid="${run_id}" -o output-prometheus-remote `;
   const k6EnvMap = {
     SERVICE: service,
     TIMEUNIT: timeunit,
@@ -165,6 +173,7 @@ export const getK6Command = (params: K6ParamsType) => {
     RNDLIMIT: rndlimit,
     RNDON: rndon,
     RNDMEMON: rndmemon,
+    HOST: host,
   };
   const k6Env = Object.entries(k6EnvMap)
     .map(([key, value]) => `-e ${key}="${value}"`)

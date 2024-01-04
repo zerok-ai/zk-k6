@@ -34,7 +34,7 @@ export function inventory() {
   const limits = scenarioRunner.getLimits();
   const params = getParams(stageIndex, limits, scenarioRunner);
   const queryparams = `?rndon=${scenarioRunner.rndon}&rndlimit=${scenarioRunner.rndlimit}&rndmemon=${scenarioRunner.rndmemon}`;
-  const endpoint = `${scenarioRunner.host}${INVENTORY_ALL_API_PATH}`;
+  const endpoint = `${scenarioRunner.host}/api/inventory/err503`;
 
   const res = http.get(endpoint, params);
   // Check for success
