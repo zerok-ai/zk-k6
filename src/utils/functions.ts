@@ -12,7 +12,7 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
   const qp = req.query;
   const {
     mvus,
-    initialVUs,
+    ivus,
     rate,
     stages,
     duration,
@@ -27,7 +27,7 @@ export const getStartParamsFromRequest = (req: Request, type = "service") => {
     run_id,
   } = qp;
   const params: K6ParamsType = {
-    initialVUs: checkIfNumber(initialVUs) ?? DEFAULT_PARAMS.INITIAL_VUS,
+    initialVUs: checkIfNumber(ivus) ?? DEFAULT_PARAMS.INITIAL_VUS,
     maxVUs: checkIfNumber(mvus) ?? DEFAULT_PARAMS.MAX_VUS,
     rate: checkIfNumber(rate) ?? DEFAULT_PARAMS.RATE,
     stages: stages ?? DEFAULT_PARAMS.STAGES,
