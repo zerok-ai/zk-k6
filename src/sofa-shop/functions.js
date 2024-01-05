@@ -1,5 +1,5 @@
 function generateRandomHexString(length) {
-  const chars = "ABCDEF0123456789";
+  const chars = "abcde0123456789";
   let result = "";
 
   for (let i = 0; i < length; i++) {

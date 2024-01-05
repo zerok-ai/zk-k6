@@ -12,4 +12,4 @@ spec:
     - protocol: TCP
       name: m-http  
       port: 80
-      targetPort: 3000
+      targetPort: 8000

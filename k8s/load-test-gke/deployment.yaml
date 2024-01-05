@@ -27,15 +27,15 @@ spec:
         effect: "NoSchedule"
       containers:
         - name: k6-load-generator
-          image: us-west-1-docker.pkg.dev/zk-client/devclient03/zk-load-test:latest
+          image: us-west1-docker.pkg.dev/zerok-dev/zk-client/devclient03/zk-load-test:latest
           imagePullPolicy: Always
           ports:
           - name: m-http
-            containerPort: 3000
+            containerPort: 8000
           resources: 
             requests: 
-              cpu: 750m
-              memory: 2500Mi
+              cpu: 1000m
+              memory: 4500Mi
             limits:
-              cpu: 850m
-              memory: 3000Mi 
+              cpu: 1850m
+              memory: 5000Mi 
