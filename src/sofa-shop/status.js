@@ -36,5 +36,5 @@ export function status() {
   check(res, {
     "is status 200": (r) => r.status === 200,
   });
-  sleep(0.1);
+  sleep(0.05);
 }
