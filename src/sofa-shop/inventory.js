@@ -41,5 +41,4 @@ export function inventory() {
   check(res, {
     "is status 200": (r) => r.status === 200,
   });
-  sleep(0.1);
 }
