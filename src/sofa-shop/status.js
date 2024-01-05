@@ -7,18 +7,13 @@ import { INVENTORY_ALL_API_PATH } from "./constants.js";
 
 const scenarioRunner = new ScenarioRunner();
 
-const service = {
-  name: "sofa-shop-inventory",
-  exec: "inventory",
-};
-
 //k6 const to be exported
 export const options = {
   discardResponseBodies: true,
   scenarios: {
-    "sofa-shop-inventory": {
+    "sofa-shop-status": {
       executor: "ramping-arrival-rate",
-      exec: "inventory",
+      exec: "status",
       timeUnit: scenarioRunner.timeUnit,
       preAllocatedVUs: scenarioRunner.initialVUs,
       maxVUs: scenarioRunner.maxVUs,
@@ -29,12 +24,12 @@ export const options = {
   },
 };
 
-export function inventory() {
+export function status() {
   const stageIndex = getCurrentStageIndex();
   const limits = scenarioRunner.getLimits();
   const params = getParams(stageIndex, limits, scenarioRunner);
   const queryparams = `?rndon=${scenarioRunner.rndon}&rndlimit=${scenarioRunner.rndlimit}&rndmemon=${scenarioRunner.rndmemon}`;
-  const endpoint = `${scenarioRunner.host}/api/inventory/err503`;
+  const endpoint = `${scenarioRunner.host}/api/inventory/status/200`;
 
   const res = http.get(endpoint, params);
   // Check for success
