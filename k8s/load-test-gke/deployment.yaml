@@ -17,9 +17,9 @@ spec:
         app: myapp
         dep: default
     spec:
-      # nodeSelector: {
-      #   role: k6
-      # }
+      nodeSelector: {
+        cloud.google.com/gke-nodepool: load-workers
+      }
       tolerations:
       - key: "dedicated"
         operator: "Equal"
