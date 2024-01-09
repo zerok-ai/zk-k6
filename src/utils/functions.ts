@@ -80,15 +80,15 @@ export const checkIfNumber = (value: any) => {
 };
 
 export const copyToLogFolder = (service: ServiceNameType, scenario: string) => {
-  const rootFolderPath = path.join(__dirname, "../");
-  const logFilePath = `${__dirname}/../lastrun-${service}-${scenario}.log`;
+  const srcFolderPath = path.join(__dirname, "..");
+  const logFilePath = `${srcFolderPath}/lastrun-${service}-${scenario}.log`;
   const logContent = fs.readFileSync(logFilePath, "utf-8");
   // Create a timestamped file name for the new log file using dayjs
   const now = dayjs();
   const formattedTimestamp = now.format("DDMMM_HHmmss");
   const newLogFileName = `${service}-${scenario}_${formattedTimestamp}.log`;
   // Define the path for the new log file in the 'logs' folder
-  const logsFolderPath = path.join(rootFolderPath, "runs");
+  const logsFolderPath = path.join(srcFolderPath, "../runs");
   const newLogFilePath = path.join(logsFolderPath, newLogFileName);
   // Ensure the 'logs' folder exists
   if (!fs.existsSync(logsFolderPath)) {
@@ -99,20 +99,19 @@ export const copyToLogFolder = (service: ServiceNameType, scenario: string) => {
   // Write the new log file
 };
 
-export const getFileNamesFromFolder = (folder: string) => {
-  const folderPath = path.join(__dirname, folder);
+export const getFileNamesFromFolder = (path: string) => {
   try {
     // Read the contents of the folder synchronously
-    const files = fs.readdirSync(folderPath);
+    const files = fs.readdirSync(path);
     return files;
   } catch (error) {
-    console.error(`Error reading folder: ${folderPath}`, error);
+    console.error(`Error reading folder: ${path}`, error);
     throw "Error reading folder";
   }
 };
 
 export const getRunFromFileName = (fileName: string) => {
-  const folderPath = path.join(__dirname, "../runs");
+  const folderPath = path.join(__dirname, "../../runs");
   const filePath = path.join(folderPath, fileName);
   try {
     // Read the contents of the folder synchronously

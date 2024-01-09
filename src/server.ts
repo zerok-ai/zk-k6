@@ -49,5 +49,5 @@ app.use(serviceRoutes);
 
 // Start server
 app.listen(APP_PORT, () => {
-  console.log(`Example app listening on port ${APP_PORT}`);
+  console.log(`K6 app listening on port ${APP_PORT}`);
 });

@@ -24,7 +24,6 @@ const parseStages = (stages) => {
       target,
     };
   });
-  console.log({ parsedStages });
   return [parsedStages, limitArray];
 };
 export default class ScenarioRunner {

@@ -116,7 +116,6 @@ router.get("/scale", (req, res) => {
 router.get("/lastrun", scenarioCheck, async (req, res) => {
   const service = req.query.service as ServiceNameType;
   const scenario = req.query.scenario as string;
-  console.log("status/service - " + service + scenario);
   try {
     const status = await controlManager.getLastRunLog(service, scenario);
     if (status.status === 200) {
@@ -148,7 +147,8 @@ router.get("/status", (_, res) => {
 // fetch all runs
 router.get("/runs", async (_, res) => {
   try {
-    const files = await getFileNamesFromFolder("../runs");
+    const runsFolder = path.join(__dirname, "../../runs");
+    const files = await getFileNamesFromFolder(runsFolder);
     return res.status(200).send({
       message: "Runs fetched",
       data: files,
@@ -174,8 +174,5 @@ router.get("/runs/:run", async (req, res) => {
     });
   }
 });
-
-
-
 
 export default router;
