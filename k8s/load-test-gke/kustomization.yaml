@@ -1,8 +1,0 @@
-bases:
-  - ../load-test
-resources:
-  - ./deployment.yaml
-nameSuffix: -k6
-namespace: k6
-commonLabels:
-  app: k6-load-generator
