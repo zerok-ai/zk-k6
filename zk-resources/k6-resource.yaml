@@ -1,0 +1,16 @@
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: run-k6-with-vars
+spec:
+  parallelism: 4
+  arguments:  -o experimental-prometheus-rw
+  script:
+    configMap:
+      name: zk-test
+      file: inventory.js
+  runner:
+    env:
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: 'http://prom.devclient03.getanton.com/api/v1/write'
+      - name: vus
