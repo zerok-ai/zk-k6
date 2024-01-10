@@ -1,0 +1,85 @@
+name: Deploy K6 Operator
+on:
+  push:
+    tags: #dev/<CLUSTER-NAME>/<DOCKER-TAG-OR-VERSION>
+      - 'dev/**'
+  workflow_dispatch:
+    inputs:
+      DOCKER_TAG:
+        description: 'Docker Image Tag'
+        required: true
+        default: 'dev'
+      GKE_CLUSTER:
+        description: 'Cluster Name'
+        required: true
+        default: 'devcloud01'
+      
+env:
+  NS: ${{ vars.NS }}
+  DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
+  GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+  GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
+  CLERK_PUBLISHABLE_KEY: ${{ vars.CLERK_PUBLISHABLE_KEY }}
+  CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+  GKE_ZONE : ${{ vars.GKE_ZONE }}
+  DOCKER_REG: ${{ vars.DOCKER_REG }}
+  PROJECT_ID:  ${{ vars.PROJECT_ID }}
+  DOCKER_REPO:  ${{ vars.DOCKER_REPO }}
+  APP_NAME:  ${{ vars.APP_NAME }}
+  DOMAIN_NAME: ${{ vars.DOMAIN_NAME }}
+  BUILD_AND_PUSH: true
+  DEPLOY: true
+
+jobs:
+  init:
+    uses: zerok-ai/zk-git-actions/.github/workflows/zk-dev-init.yml@main
+    with:
+      GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+      GIT_TAG: ${{ github.ref }}
+      DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
+  ##############
+  print-envs:
+    needs: [init]
+    runs-on: zk-self-hosted
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      VERSION: ${{ needs.init.outputs.VERSION }}
+      ENVIRONMENT: ${{ needs.init.outputs.ENVIRONMENT }}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    steps:
+      - name: Print environment vars
+        run: |
+          echo "GIT_TAG=$GIT_TAG"
+          echo "CLUSTER_NAME=$CLUSTERNAME"
+          echo "DOCKER_TAG=$VERSION"
+          echo "GKE_ZONE=$GKE_ZONE"
+          echo "DOCKER_REPO=$DOCKER_REPO"
+          echo "K8S_NAMESPACE=$NS"
+          echo "ENVIRONMENT=$ENVIRONMENT"
+
+  deploy:
+    needs: [init]
+    runs-on: zk-self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v0'
+        with:
+          credentials_json: '${{ env.GKE_SA_KEY }}'
+
+      - id: 'get-credentials'
+        uses: 'google-github-actions/get-gke-credentials@v1'
+        with:
+          cluster_name: '${{ env.CLUSTERNAME }}'
+          location: '${{ env.GKE_ZONE }}'
+
+      - name: Deploy K6 Operator
+        run: |-
+          helm repo add grafana https://grafana.github.io/helm-charts \
+          helm repo update \
+          helm install k6-operator grafana/k6-operator
+    
