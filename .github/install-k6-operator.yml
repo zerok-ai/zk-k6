@@ -12,10 +12,9 @@ on:
       GKE_CLUSTER:
         description: 'Cluster Name'
         required: true
-        default: 'devcloud01'
+        default: 'devclient03'
       
 env:
-  NS: ${{ vars.NS }}
   DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
   GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
@@ -74,7 +73,7 @@ jobs:
       - id: 'get-credentials'
         uses: 'google-github-actions/get-gke-credentials@v1'
         with:
-          cluster_name: '${{ env.CLUSTERNAME }}'
+          cluster_name: '${{ steps.init.output.CLUSTERNAME }}'
           location: '${{ env.GKE_ZONE }}'
 
       - name: Deploy K6 Operator
