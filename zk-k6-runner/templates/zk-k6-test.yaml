@@ -1,0 +1,34 @@
+# prettier-ignore
+apiVersion: k6.io/v1alpha1
+kind: TestRun
+metadata:
+  name: zk-k6-runner
+  namespace: {{ .Values.namespace }}
+spec:
+  parallelism: {{ .Values.testVars.PODCOUNT }}
+  arguments: -o experimental-prometheus-rw
+  # cleanup: post
+  script:
+    configMap:
+      name: {{ .Values.configmap.name }}
+      file: {{ .Values.testVars.SCRIPT }}
+  initializer:
+    env:
+      - name: "K6_INCLUDE_SYSTEM_ENV_VARS" # this enables environment variables for the initializer
+        value: "1"
+      - name: STAGES
+        value: "{{ .Values.testVars.STAGES }}"
+      - name: VUS
+        value: "{{ .Values.testVars.VUS }}"
+      - name: START_RATE
+        value: "{{ .Values.testVars.START_RATE }}"
+  runner:
+    env:
+      - name: K6_PROMETHEUS_RW_SERVER_URL
+        value: "http://prom-kube-prometheus-stack-prometheus.monitoring.svc.cluster.local:9090/api/v1/write"
+      - name: STAGES
+        value: "{{ .Values.testVars.STAGES }}"
+      - name: VUS
+        value: "{{ .Values.testVars.VUS }}"
+      - name: START_RATE
+        value: "{{ .Values.testVars.START_RATE }}"

@@ -48,7 +48,7 @@ export function inventory() {
   };
   params["headers"]["traceparent"] = traceparent;
   params["headers"]["Content-Type"] = "application/json";
-  const endpoint = `https://sofa-shop.mysql.devclient03.getanton.com/api/inventory/status/200`;
+  const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/all`;
   const res = http.get(endpoint, params);
   // Check for success
   check(res, {

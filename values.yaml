@@ -8,8 +8,9 @@ customLabels: {}
 podLabels: {}
 
 # nodeSelector -- Node Selector to be applied on all containers
-nodeSelector: 
+nodeSelector: {
   cloud.google.com/gke-nodepool: load-workers
+}
 
 # affinity -- Affinity to be applied on all containers
 affinity: {}

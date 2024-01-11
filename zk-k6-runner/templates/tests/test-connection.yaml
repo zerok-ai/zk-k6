@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "zk-k6-runner.fullname" . }}-test-connection"
+  labels:
+    {{- include "zk-k6-runner.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "zk-k6-runner.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
