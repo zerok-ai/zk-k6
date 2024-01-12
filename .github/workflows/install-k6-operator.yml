@@ -91,6 +91,8 @@ jobs:
   start-test:
     needs: [deploy-k6-operator]
     runs-on: zk-self-hosted
+    environment:
+      name: "poc"
     env:
       GKE_ZONE: ${{ vars.GKE_ZONE }}
     steps:
