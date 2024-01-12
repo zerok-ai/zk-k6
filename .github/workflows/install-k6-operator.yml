@@ -34,7 +34,6 @@ on:
 env:
   GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
-  GKE_ZONE: ${{ vars.GKE_ZONE }}
 
 jobs:
   print-envs:
@@ -107,7 +106,7 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
-          location: "${{ env.GKE_ZONE }}"
+          location: "${{ vars.GKE_ZONE }}"
 
       - name: Deploy helm chart & start test
         run: |-
