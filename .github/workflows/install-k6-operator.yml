@@ -1,0 +1,127 @@
+name: Deploy K6 Operator
+on:
+  workflow_dispatch:
+    inputs:
+      INSTALL_K6_OPERATOR:
+        description: "Install K6 Operator"
+        required: true
+        default: "false"
+      K6_SCRIPT:
+        description: "K6 Script"
+        required: true
+        default: "status.js"
+      K6_STAGES:
+        description: "K6 Stages - format - <duration>_<vus>-<duration>_<vus>"
+        required: true
+        default: "10s_10000-10s_10000"
+      K6_VUS:
+        description: "K6 VUS"
+        required: true
+        default: "9000"
+      K6_START_RATE:
+        description: "K6 Start Rate"
+        required: true
+        default: "10000"
+      K6_PODCOUNT:
+        description: "K6 Pod Count - number of pods to run the test"
+        required: true
+        default: "4"
+      GKE_CLUSTER:
+        description: "Cluster Name"
+        required: true
+        default: "onlyclient01"
+
+env:
+  DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
+  GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+  GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
+  GKE_ZONE: ${{ vars.GKE_ZONE }}
+  PROJECT_ID: ${{ vars.PROJECT_ID }}
+  APP_NAME: ${{ vars.APP_NAME }}
+
+jobs:
+  init:
+    uses: zerok-ai/zk-git-actions/.github/workflows/zk-dev-init.yml@main
+    with:
+      GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+      GIT_TAG: ${{ github.ref }}
+      DOCKER_TAG: ${{ github.event.inputs.DOCKER_TAG }}
+  ##############
+  print-envs:
+    needs: [init]
+    runs-on: zk-self-hosted
+    env:
+      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      K6_PODCOUNT: ${{ github.event.inputs.K6_PODCOUNT }}
+      K6_SCRIPT: ${{ github.event.inputs.K6_SCRIPT }}
+      K6_STAGES: ${{ github.event.inputs.K6_STAGES }}
+      K6_VUS: ${{ github.event.inputs.K6_VUS }}
+    environment:
+      name: ${{ needs.init.outputs.ENVIRONMENT }}
+    steps:
+      - name: Print environment vars
+        run: |
+          echo "GIT_TAG=$GIT_TAG"
+          echo "CLUSTER_NAME=$CLUSTERNAME"
+          echo "K6_PODCOUNT=$K6_PODCOUNT"
+          echo "K6_SCRIPT=$K6_SCRIPT"
+          echo "K6_STAGES=$K6_STAGES"
+          echo "K6_VUS=$K6_VUS"
+          echo "ENVIRONMENT=$ENVIRONMENT"
+
+  ##############
+  deploy-k6-operator:
+    needs: [init]
+    runs-on: zk-self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ env.GKE_SA_KEY }}"
+
+      - id: "get-credentials"
+        uses: "google-github-actions/get-gke-credentials@v1"
+        with:
+          cluster_name: "${{ steps.init.output.CLUSTERNAME }}"
+          location: "${{ env.GKE_ZONE }}"
+
+      - name: Deploy K6 Operator
+        run: |
+          if: ${{ github.event.inputs.INSTALL_K6_OPERATOR == 'true' }}
+            helm repo add grafana https://grafana.github.io/helm-charts \
+            helm repo update \
+            helm install k6-operator grafana/k6-operator
+          else:
+            echo "Skipping operator installation"
+
+  start-test:
+    needs: [init, deploy-k6-operator]
+    runs-on: zk-self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - id: "auth"
+        name: "Authenticate to Google Cloud"
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ env.GKE_SA_KEY }}"
+
+      - id: "get-credentials"
+        uses: "google-github-actions/get-gke-credentials@v1"
+        with:
+          cluster_name: "${{ steps.init.output.CLUSTERNAME }}"
+          location: "${{ env.GKE_ZONE }}"
+
+      - name: Deploy helm chart & start test
+        run: |-
+          helm install zk-k6-runner ./zk-k6-runner \
+            --set testVars.POD_COUNT=${{ github.event.inputs.K6_PODCOUNT }} \
+            --set testVars.STAGES=${{ github.event.inputs.K6_STAGES }} \
+            --set testVars.VUS=${{ github.event.inputs.K6_VUS }} \
+            --set testVars.START_RATE=${{ github.event.inputs.K6_START_RATE }} \
+            --set testVars.SCRIPT=${{ github.event.inputs.K6_SCRIPT }} \
