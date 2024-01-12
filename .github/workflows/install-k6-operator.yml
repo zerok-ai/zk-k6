@@ -93,8 +93,6 @@ jobs:
     runs-on: zk-self-hosted
     environment:
       name: "poc"
-    env:
-      GKE_ZONE: ${{ vars.GKE_ZONE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
