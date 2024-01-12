@@ -76,7 +76,7 @@ jobs:
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
           cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
-          location: "${{ vars.GKE_ZONE }}"
+          location: "${{ env.GKE_ZONE }}"
 
       - name: Deploy K6 Operator
         run: |
@@ -91,6 +91,8 @@ jobs:
   start-test:
     needs: [deploy-k6-operator]
     runs-on: zk-self-hosted
+    env:
+      GKE_ZONE: ${{ vars.GKE_ZONE }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
