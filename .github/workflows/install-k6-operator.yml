@@ -56,7 +56,7 @@ jobs:
           echo "K6_SCRIPT=$K6_SCRIPT"
           echo "K6_STAGES=$K6_STAGES"
           echo "K6_VUS=$K6_VUS"
-          echo "ENVIRONMENT=$ENVIRONMENT"
+          echo "GKE_ZONE=$GKE_ZONE"
 
   ##############
   deploy-k6-operator:
