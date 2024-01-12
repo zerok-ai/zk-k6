@@ -57,38 +57,8 @@ jobs:
           echo "K6_VUS=$K6_VUS"
           echo "GKE_ZONE=$GKE_ZONE"
 
-  ##############
-  deploy-k6-operator:
-    needs: [print-envs]
-    runs-on: zk-self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v0"
-        with:
-          credentials_json: "${{ env.GKE_SA_KEY }}"
-
-      - id: "get-credentials"
-        uses: "google-github-actions/get-gke-credentials@v1"
-        with:
-          cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
-          location: "${{ env.GKE_ZONE }}"
-
-      - name: Deploy K6 Operator
-        run: |
-          if [ "${{ github.event.inputs.INSTALL_K6_OPERATOR }}" == 'true' ]; then
-            helm repo add grafana https://grafana.github.io/helm-charts 
-            helm repo update 
-            helm install k6-operator grafana/k6-operator
-          else:
-            echo "Skipping operator installation"
-          fi
-
   start-test:
-    needs: [deploy-k6-operator]
+    needs: [print-envs]
     runs-on: zk-self-hosted
     environment:
       name: "poc"
@@ -107,6 +77,16 @@ jobs:
         with:
           cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
           location: "us-west1-b"
+
+      - name: "K6 Operator Installation"
+        run: |
+          if [ "${{ github.event.inputs.INSTALL_K6_OPERATOR }}" == 'true' ]; then
+            helm repo add grafana https://grafana.github.io/helm-charts 
+            helm repo update 
+            helm install k6-operator grafana/k6-operator
+          else:
+            echo "Skipping operator installation"
+          fi
 
       - name: Deploy helm chart & start test
         run: |-
