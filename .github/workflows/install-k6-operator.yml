@@ -35,27 +35,18 @@ env:
   GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
   GKE_ZONE: ${{ vars.GKE_ZONE }}
-  PROJECT_ID: ${{ vars.PROJECT_ID }}
-  APP_NAME: ${{ vars.APP_NAME }}
 
 jobs:
-  init:
-    uses: zerok-ai/zk-git-actions/.github/workflows/zk-dev-init.yml@main
-    with:
-      GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
-      GIT_TAG: ${{ github.ref }}
-  ##############
   print-envs:
-    needs: [init]
     runs-on: zk-self-hosted
     env:
-      CLUSTERNAME: ${{ needs.init.outputs.CLUSTERNAME }}
+      CLUSTERNAME: ${{ github.event.inputs.GKE_CLUSTER }}
       K6_PODCOUNT: ${{ github.event.inputs.K6_PODCOUNT }}
       K6_SCRIPT: ${{ github.event.inputs.K6_SCRIPT }}
       K6_STAGES: ${{ github.event.inputs.K6_STAGES }}
       K6_VUS: ${{ github.event.inputs.K6_VUS }}
     environment:
-      name: ${{ needs.init.outputs.ENVIRONMENT }}
+      name: "poc"
     steps:
       - name: Print environment vars
         run: |
@@ -69,7 +60,7 @@ jobs:
 
   ##############
   deploy-k6-operator:
-    needs: [init]
+    needs: [print-envs]
     runs-on: zk-self-hosted
     steps:
       - name: Checkout
@@ -84,7 +75,7 @@ jobs:
       - id: "get-credentials"
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
-          cluster_name: "${{ steps.init.output.CLUSTERNAME }}"
+          cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
           location: "${{ env.GKE_ZONE }}"
 
       - name: Deploy K6 Operator
@@ -98,7 +89,7 @@ jobs:
           fi
 
   start-test:
-    needs: [init, deploy-k6-operator]
+    needs: [deploy-k6-operator]
     runs-on: zk-self-hosted
     steps:
       - name: Checkout
@@ -113,7 +104,7 @@ jobs:
       - id: "get-credentials"
         uses: "google-github-actions/get-gke-credentials@v1"
         with:
-          cluster_name: "${{ steps.init.output.CLUSTERNAME }}"
+          cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
           location: "${{ env.GKE_ZONE }}"
 
       - name: Deploy helm chart & start test

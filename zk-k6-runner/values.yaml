@@ -25,8 +25,8 @@ configmap:
 
 
 testVars:
-  STAGES: "10s_10000-10s_10000"
-  VUS: "9000"
+  STAGES: "5m_10000-5m_10000"
+  VUS: "10000"
   START_RATE: "10000"
   SCRIPT: "status.js"
   PODCOUNT: "4"
