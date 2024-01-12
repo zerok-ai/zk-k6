@@ -91,6 +91,7 @@ jobs:
       - name: Deploy helm chart & start test
         run: |-
           helm uninstall zk-k6-runner || true \
+          && sleep 5 \
           && helm install zk-k6-runner ./zk-k6-runner \
             --set testVars.POD_COUNT=${{ github.event.inputs.K6_PODCOUNT }} \
             --set testVars.STAGES=${{ github.event.inputs.K6_STAGES }} \
