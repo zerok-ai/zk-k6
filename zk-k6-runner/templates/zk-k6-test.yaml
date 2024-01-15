@@ -7,7 +7,6 @@ metadata:
 spec:
   parallelism: {{ .Values.testVars.PODCOUNT }}
   arguments: -o experimental-prometheus-rw
-  cleanup: post
   script:
     configMap:
       name: {{ .Values.configmap.name }}
