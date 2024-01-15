@@ -50,6 +50,7 @@ export const options = {
   scenarios: {
     "sofa-shop-status": {
       preallocatedVUs: vus,
+      maxVUs: 6000,
       startRate,
       stages,
       executor: "ramping-arrival-rate",
@@ -71,7 +72,7 @@ export function status() {
   const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/status/200`;
   http.asyncRequest("GET", endpoint, null, params);
   // Check for success
-  //   check(res, {
-  //     "is status 200": (r) => r.status === 200,
-  //   });
+  // check(res, {
+  //   "is status 200": (r) => r.status === 200,
+  // });
 }

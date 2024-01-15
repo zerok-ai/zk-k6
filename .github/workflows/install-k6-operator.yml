@@ -17,7 +17,7 @@ on:
       K6_VUS:
         description: "K6 VUS"
         required: true
-        default: "9000"
+        default: "500"
       K6_START_RATE:
         description: "K6 Start Rate"
         required: true
@@ -25,7 +25,7 @@ on:
       K6_PODCOUNT:
         description: "K6 Pod Count - number of pods to run the test"
         required: true
-        default: "4"
+        default: "8"
       GKE_CLUSTER:
         description: "Cluster Name"
         required: true
