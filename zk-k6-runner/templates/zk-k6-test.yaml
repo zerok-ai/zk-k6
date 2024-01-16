@@ -6,7 +6,7 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   parallelism: {{ .Values.testVars.PODCOUNT }}
-  arguments: -o experimental-prometheus-rw --tag testId={{ .Values.testVars.TEST_ID }}
+  arguments: -o experimental-prometheus-rw --tag testid={{ .Values.testVars.TEST_ID }}
   script:
     configMap:
       name: {{ .Values.configmap.name }}
