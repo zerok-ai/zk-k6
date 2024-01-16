@@ -31,3 +31,5 @@ spec:
         value: "{{ .Values.testVars.VUS }}"
       - name: START_RATE
         value: "{{ .Values.testVars.START_RATE }}"
+      - name: MAX_VUS
+        value: "{{ .Values.testVars.MAX_VUS }}"

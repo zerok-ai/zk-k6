@@ -26,11 +26,12 @@ configmap:
 # Default params, will be overriden by git actions, use for local testing
 testVars:
   STAGES: "10s_12000-10s_15000"
-  VUS: "8000"
+  VUS: "500"
   START_RATE: "15000"
   SCRIPT: "status.js"
   PODCOUNT: "8"
   TEST_ID: "zk-test"
+  MAX_VUS: "8000"
 
 
 
