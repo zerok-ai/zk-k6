@@ -44,13 +44,14 @@ const parseStages = (stages) => {
 const stages = parseStages(__ENV.STAGES);
 const vus = parseInt(__ENV.VUS);
 const startRate = parseInt(__ENV.START_RATE);
+const maxVUs = parseInt(__ENV.MAX_VUS);
 //k6 const to be exported
 export const options = {
   discardResponseBodies: true,
   scenarios: {
     "sofa-shop-status": {
       preallocatedVUs: vus,
-      maxVUs: 8000,
+      maxVUs,
       startRate,
       stages,
       executor: "ramping-arrival-rate",

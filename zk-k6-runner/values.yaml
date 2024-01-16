@@ -30,6 +30,7 @@ testVars:
   START_RATE: "15000"
   SCRIPT: "status.js"
   PODCOUNT: "8"
+  TEST_ID: "zk-test"
 
 
 

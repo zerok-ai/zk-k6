@@ -18,10 +18,17 @@ on:
         description: "K6 VUS"
         required: true
         default: "500"
+      K6_MAX_VUS:
+        description: "Max vus"
+        required: true
+        default: "2500"
       K6_START_RATE:
         description: "K6 Start Rate"
         required: true
         default: "10000"
+      K6_TEST_ID:
+        description: "K6 Test ID"
+        default: "test-$(date +%s)"
       K6_PODCOUNT:
         description: "K6 Pod Count - number of pods to run the test"
         required: true
@@ -98,3 +105,4 @@ jobs:
             --set testVars.VUS=${{ github.event.inputs.K6_VUS }} \
             --set testVars.START_RATE=${{ github.event.inputs.K6_START_RATE }} \
             --set testVars.SCRIPT=${{ github.event.inputs.K6_SCRIPT }} \
+            --set testVars.TEST_ID=${{ github.event.inputs.K6_TEST_ID }} \
