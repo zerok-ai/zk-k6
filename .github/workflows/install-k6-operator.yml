@@ -106,3 +106,4 @@ jobs:
             --set testVars.START_RATE=${{ github.event.inputs.K6_START_RATE }} \
             --set testVars.SCRIPT=${{ github.event.inputs.K6_SCRIPT }} \
             --set testVars.TEST_ID=${{ github.event.inputs.K6_TEST_ID }} \
+            --set testVars.MAX_VUS=${{ github.event.inputs.K6_MAX_VUS }} \
