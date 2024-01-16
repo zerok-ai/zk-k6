@@ -30,6 +30,7 @@ installCRDs: true
 namespace:
   # namespace.create -- create the namespace (default: true)
   create: true
+  name: "zk-k6-test"
 
 prometheus:
   # prometheus.enabled -- enables the prometheus metrics scraping (default: false)
