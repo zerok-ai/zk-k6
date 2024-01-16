@@ -1,3 +1,4 @@
+#prettier-ignore
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,3 +7,5 @@ metadata:
 data:
   status.js: |-
 {{ .Files.Get "status.js" | indent 4 }}
+  inventory.js: |-
+{{ .Files.Get "inventory.js" | indent 4 }}

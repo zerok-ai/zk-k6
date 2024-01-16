@@ -50,7 +50,7 @@ export const options = {
   scenarios: {
     "sofa-shop-status": {
       preallocatedVUs: vus,
-      maxVUs: 6000,
+      maxVUs: 8000,
       startRate,
       stages,
       executor: "ramping-arrival-rate",

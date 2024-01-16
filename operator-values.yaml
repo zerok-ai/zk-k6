@@ -1,5 +1,11 @@
+# Use this values file for the k6 operator install
+
 # customAnnotations -- Custom Annotations to be applied on all resources
 customAnnotations: {}
+
+service:
+  type: ClusterIP
+  port: 80
 
 # customLabels -- Custom Label to be applied on all resources
 customLabels: {}

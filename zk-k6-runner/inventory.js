@@ -14,24 +14,45 @@ function generateRandomHexString(length) {
   return result;
 }
 
+const DEFAULT_STAGES = [
+  {
+    duration: "2m",
+    target: 10000,
+  },
+  {
+    duration: "3m",
+    target: 10000,
+  },
+];
+
+const parseStages = (stages) => {
+  try {
+    const stagesArray = stages.split("-");
+    const parsedStages = stagesArray.map((stage, idx) => {
+      const [duration, targetVUs, limit] = stage.split("_");
+      const target = parseInt(targetVUs);
+      return {
+        duration,
+        target,
+      };
+    });
+    return parsedStages;
+  } catch (err) {
+    return DEFAULT_STAGES;
+  }
+};
+const stages = parseStages(__ENV.STAGES);
+const vus = parseInt(__ENV.VUS);
+const startRate = parseInt(__ENV.START_RATE);
 //k6 const to be exported
 export const options = {
   discardResponseBodies: true,
   scenarios: {
     "sofa-shop-inventory": {
-      preallocatedVUs: 700,
-      maxVUs: 2000,
-      startRate: 2000,
-      stages: [
-        {
-          duration: "30s",
-          target: 3000,
-        },
-        {
-          duration: "30s",
-          target: 3000,
-        },
-      ],
+      preallocatedVUs: vus,
+      maxVUs: 8000,
+      startRate,
+      stages,
       executor: "ramping-arrival-rate",
       exec: "inventory",
     },
@@ -49,9 +70,9 @@ export function inventory() {
   params["headers"]["traceparent"] = traceparent;
   params["headers"]["Content-Type"] = "application/json";
   const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/all`;
-  const res = http.get(endpoint, params);
+  http.asyncRequest("GET", endpoint, null, params);
   // Check for success
-  check(res, {
-    "is status 200": (r) => r.status === 200,
-  });
+  // check(res, {
+  //   "is status 200": (r) => r.status === 200,
+  // });
 }
