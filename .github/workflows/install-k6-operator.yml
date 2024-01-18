@@ -28,7 +28,7 @@ on:
         default: "10000"
       K6_TEST_ID:
         description: "K6 Test ID"
-        default: "test-$(date +%s)"
+        default: "zk-test"
       K6_PODCOUNT:
         description: "K6 Pod Count - number of pods to run the test"
         required: true
