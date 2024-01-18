@@ -27,11 +27,11 @@ configmap:
 testVars:
   STAGES: "10s_12000-10s_15000"
   VUS: "500"
-  START_RATE: "15000"
+  START_RATE: "8000"
   SCRIPT: "status.js"
-  PODCOUNT: "8"
+  POD_COUNT: "8"
   TEST_ID: "zk-test"
-  MAX_VUS: "8000"
+  MAX_VUS: "2000"
 
 
 
