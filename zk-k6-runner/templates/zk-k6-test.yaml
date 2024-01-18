@@ -5,7 +5,7 @@ metadata:
   name: zk-k6-runner
   namespace: {{ .Values.namespace }}
 spec:
-  parallelism: {{ .Values.testVars.PODCOUNT }}
+  parallelism: {{ .Values.testVars.POD_COUNT }}
   arguments: -o experimental-prometheus-rw --tag testid={{ .Values.testVars.TEST_ID }}
   script:
     configMap:
