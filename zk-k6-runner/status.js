@@ -47,7 +47,7 @@ const startRate = parseInt(__ENV.START_RATE);
 const maxVUs = parseInt(__ENV.MAX_VUS);
 const codes = [200, 400, 500];
 // get random status code
-const status = codes[Math.floor(Math.random() * codes.length)];
+const statusCode = codes[Math.floor(Math.random() * codes.length)];
 //k6 const to be exported
 export const options = {
   discardResponseBodies: true,
@@ -73,7 +73,7 @@ export function status() {
   };
   params["headers"]["traceparent"] = traceparent;
   params["headers"]["Content-Type"] = "application/json";
-  const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/status/${status}`;
+  const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/status/${statusCode}`;
   http.asyncRequest("GET", endpoint, null, params);
   // Check for success
   // check(res, {
