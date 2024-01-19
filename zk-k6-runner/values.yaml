@@ -1,3 +1,4 @@
+# prettier-ignore
 # Default values for zk-k6-runner.
 # This is a YAML-formatted file.
 # Declare variables to be passed into the test runner.
@@ -9,9 +10,8 @@ service:
   port: 80
 
 
-nodeSelector: {
+nodeSelector:
   cloud.google.com/gke-nodepool: load-workers
-}
 
 tolerations: []
 
@@ -26,12 +26,11 @@ configmap:
 # Default params, will be overriden by git actions, use for local testing
 testVars:
   STAGES: "10s_12000-10s_15000"
-  VUS: "500"
+  VUS: "100"
   START_RATE: "8000"
   SCRIPT: "status.js"
   POD_COUNT: "8"
   TEST_ID: "zk-test"
-  MAX_VUS: "2000"
-
+  MAX_VUS: "500"
 
 
