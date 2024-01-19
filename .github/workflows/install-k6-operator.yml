@@ -13,30 +13,30 @@ on:
       K6_STAGES:
         description: "K6 Stages - format - <duration>_<vus>-<duration>_<vus>"
         required: true
-        default: "10s_10000-10s_10000"
+        default: "10s_100-10s_100"
       K6_VUS:
         description: "K6 VUS"
         required: true
-        default: "500"
+        default: "10"
       K6_MAX_VUS:
         description: "Max vus"
         required: true
-        default: "2500"
+        default: "50"
       K6_START_RATE:
         description: "K6 Start Rate"
         required: true
-        default: "10000"
+        default: "100"
       K6_TEST_ID:
         description: "K6 Test ID"
         default: "zk-test"
       K6_PODCOUNT:
         description: "K6 Pod Count - number of pods to run the test"
         required: true
-        default: "8"
+        default: "4"
       GKE_CLUSTER:
         description: "Cluster Name"
         required: true
-        default: "onlyclient01"
+        default: "devclient03"
 
 env:
   GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
