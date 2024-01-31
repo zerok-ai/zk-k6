@@ -108,6 +108,6 @@ jobs:
             --set testVars.TEST_ID=${{ github.event.inputs.K6_TEST_ID }} \
             --set testVars.MAX_VUS=${{ github.event.inputs.K6_MAX_VUS }} \
           && kubectl label --overwrite svc zk-scenario-manager testid=${{ github.event.inputs.K6_TEST_ID }} -n zk-client \
-          && kubectl label --overwrite svc zk-otlp-receiver testid=${{ github.event.inputs.K6_TEST_ID }} -n zk-client \
+          && kubectl label --overwrite svc zk-observer testid=${{ github.event.inputs.K6_TEST_ID }} -n zk-client \
           && kubectl label --overwrite svc inventory testid=${{ github.event.inputs.K6_TEST_ID }} -n sofa-shop-mysql \
           && kubectl label --overwrite svc opentelemetry-collector testid=${{ github.event.inputs.K6_TEST_ID }} -n opentelemetry-operator-system
