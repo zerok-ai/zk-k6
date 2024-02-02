@@ -89,7 +89,7 @@ jobs:
         run: |
           if [ -z "${{ github.event.inputs.TEST_ID }}" ]; then
             echo "Generating Timestamp..."
-            echo "TEST_ID=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
+            echo "TEST_ID=$(date +"%Y-%m-%d-%H.%M.%S")" >> $GITHUB_ENV
           else
             echo "Using provided TEST_ID: ${TEST_ID}"
             echo "TEST_ID=${{ github.event.inputs.TEST_ID }}" >> $GITHUB_ENV
