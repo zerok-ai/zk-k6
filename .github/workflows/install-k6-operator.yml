@@ -6,6 +6,9 @@ on:
         description: "Install K6 Operator"
         required: true
         default: "false"
+      TEST_ID:
+        description: "Test ID - cant include special characters; if not provided, timestamp will be generated"
+        required: false
       K6_SCRIPT:
         description: "K6 Script"
         required: true
@@ -82,8 +85,16 @@ jobs:
           cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
           location: "us-west1-b"
 
-      - name: "Generate Timestamp"
-        run: echo "TIMESTAMP=$(date +"%Y-%m-%d-%H.%M.%S")" >> $GITHUB_ENV
+      - name: "Set Test ID"
+        run: |
+          if [ -z "${{ github.event.inputs.TEST_ID }}" ]; then
+            echo "Generating Timestamp..."
+            echo "TEST_ID=$(date +"%Y%m%d%H%M%S")" >> $GITHUB_ENV
+          else
+            echo "Using provided TEST_ID: ${TEST_ID}"
+            echo "TEST_ID=${{ github.event.inputs.TEST_ID }}" >> $GITHUB_ENV
+          fi
+          echo "Final TEST_ID: $TEST_ID"
 
       - name: "K6 Operator Installation"
         run: |
@@ -97,7 +108,7 @@ jobs:
 
       - name: Deploy helm chart & start test
         run: |-
-          echo "TIMESTAMP=$TIMESTAMP" &&
+          echo "TIMESTAMP=$TEST_ID" &&
           helm uninstall zk-k6-runner || true \
           && sleep 5 \
           && helm install zk-k6-runner ./zk-k6-runner \
@@ -106,9 +117,9 @@ jobs:
             --set testVars.VUS=${{ github.event.inputs.K6_VUS }} \
             --set testVars.START_RATE=${{ github.event.inputs.K6_START_RATE }} \
             --set testVars.SCRIPT=${{ github.event.inputs.K6_SCRIPT }} \
-            --set testVars.TEST_ID=$TIMESTAMP \
+            --set testVars.TEST_ID=$TEST_ID \
             --set testVars.MAX_VUS=${{ github.event.inputs.K6_MAX_VUS }} \
-          && kubectl label --overwrite svc zk-scenario-manager testid=$TIMESTAMP -n zk-client \
-          && kubectl label --overwrite svc zk-observer testid=$TIMESTAMP -n zk-client \
-          && kubectl label --overwrite svc inventory testid=$TIMESTAMP -n sofa-shop-mysql \
-          && kubectl label --overwrite svc opentelemetry-collector testid=$TIMESTAMP -n opentelemetry-operator-system
+          && kubectl label --overwrite svc zk-scenario-manager testid=$TEST_ID -n zk-client \
+          && kubectl label --overwrite svc zk-observer testid=$TEST_ID -n zk-client \
+          && kubectl label --overwrite svc inventory testid=$TEST_ID -n sofa-shop-mysql \
+          && kubectl label --overwrite svc opentelemetry-collector testid=$TEST_ID -n opentelemetry-operator-system
