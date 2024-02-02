@@ -83,7 +83,7 @@ jobs:
           location: "us-west1-b"
 
       - name: "Generate Timestamp"
-        run: echo "TIMESTAMP=$(date +"%Y-%m-%d-%H:%M:%S")" >> $GITHUB_ENV
+        run: echo "TIMESTAMP=$(date +"%Y-%m-%d-%H.%M.%S")" >> $GITHUB_ENV
 
       - name: "K6 Operator Installation"
         run: |
