@@ -109,6 +109,6 @@ jobs:
             --set testVars.TEST_ID=$TIMESTAMP \
             --set testVars.MAX_VUS=${{ github.event.inputs.K6_MAX_VUS }} \
           && kubectl label --overwrite svc zk-scenario-manager testid=$TIMESTAMP -n zk-client \
-          && kubectl label --overwrite svc zk-otlp-receiver testid=$TIMESTAMP -n zk-client \
+          && kubectl label --overwrite svc zk-observer testid=$TIMESTAMP -n zk-client \
           && kubectl label --overwrite svc inventory testid=$TIMESTAMP -n sofa-shop-mysql \
           && kubectl label --overwrite svc opentelemetry-collector testid=$TIMESTAMP -n opentelemetry-operator-system
