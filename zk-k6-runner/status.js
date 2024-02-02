@@ -74,7 +74,7 @@ export function status() {
   // get random status code
   const statusCode = codes[Math.floor(Math.random() * codes.length)];
   const endpoint = `http://inventory.sofa-shop-mysql.svc.cluster.local/api/inventory/status/${statusCode}`;
-  http.request("GET", endpoint, null, params);
+  http.asyncRequest("GET", endpoint, null, params);
   // Check for success
   // check(res, {
   //   "is status 200": (r) => r.status === 200,
