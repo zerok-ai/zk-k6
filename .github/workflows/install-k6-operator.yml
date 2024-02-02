@@ -83,7 +83,7 @@ jobs:
           location: "us-west1-b"
 
       - name: "Generate Timestamp"
-        run: echo "TIMESTAMP=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        run: echo "TIMESTAMP=$(date +"%Y-%m-%d-%H:%M:%S")" >> $GITHUB_ENV
 
       - name: "K6 Operator Installation"
         run: |
@@ -106,7 +106,7 @@ jobs:
             --set testVars.VUS=${{ github.event.inputs.K6_VUS }} \
             --set testVars.START_RATE=${{ github.event.inputs.K6_START_RATE }} \
             --set testVars.SCRIPT=${{ github.event.inputs.K6_SCRIPT }} \
-            --set testVars.TEST_ID="$TIMESTAMP" \
+            --set testVars.TEST_ID=$TIMESTAMP \
             --set testVars.MAX_VUS=${{ github.event.inputs.K6_MAX_VUS }} \
           && kubectl label --overwrite svc zk-scenario-manager testid=$TIMESTAMP -n zk-client \
           && kubectl label --overwrite svc zk-otlp-receiver testid=$TIMESTAMP -n zk-client \
