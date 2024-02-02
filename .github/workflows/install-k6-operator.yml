@@ -97,6 +97,7 @@ jobs:
 
       - name: Deploy helm chart & start test
         run: |-
+          echo "TIMESTAMP=$TIMESTAMP" &&
           helm uninstall zk-k6-runner || true \
           && sleep 5 \
           && helm install zk-k6-runner ./zk-k6-runner \
