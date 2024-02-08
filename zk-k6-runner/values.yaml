@@ -11,7 +11,7 @@ service:
 
 
 nodeSelector:
-  cloud.google.com/gke-nodepool: load-workers
+  alpha.eksctl.io/nodegroup-name: k6
 
 tolerations: []
 
@@ -25,12 +25,12 @@ configmap:
 
 # Default params, will be overriden by git actions, use for local testing
 testVars:
-  STAGES: "10s_12000-10s_15000"
-  VUS: "100"
-  START_RATE: "8000"
+  STAGES: "10s_5000-10s_5000"
+  VUS: "1000"
+  START_RATE: "5000"
   SCRIPT: "status.js"
-  POD_COUNT: "8"
+  POD_COUNT: "4"
   TEST_ID: "zk-test"
-  MAX_VUS: "500"
+  MAX_VUS: "5000"
 
 

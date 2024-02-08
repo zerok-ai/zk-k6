@@ -33,20 +33,23 @@ on:
         description: "K6 Pod Count - number of pods to run the test"
         required: true
         default: "4"
-      GKE_CLUSTER:
+      AWS_CLUSTER:
         description: "Cluster Name"
         required: true
-        default: "onlyclient01"
+        default: "awsclient02"
 
 env:
-  GKE_CLUSTER: ${{ github.event.inputs.GKE_CLUSTER }}
+  AWS_CLUSTER: ${{ github.event.inputs.AWS_CLUSTER }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID_AWS }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY_AWS }}
+  AWS_DEFAULT_REGION: ${{ secrets.DEFAULT_REGION_AWS }}
 
 jobs:
   print-envs:
     runs-on: zk-self-hosted
     env:
-      CLUSTERNAME: ${{ github.event.inputs.GKE_CLUSTER }}
+      CLUSTERNAME: ${{ github.event.inputs.AWS_CLUSTER }}
       K6_PODCOUNT: ${{ github.event.inputs.K6_PODCOUNT }}
       K6_SCRIPT: ${{ github.event.inputs.K6_SCRIPT }}
       K6_STAGES: ${{ github.event.inputs.K6_STAGES }}
@@ -73,17 +76,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - id: "auth"
-        name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@v0"
+      - name: "Configure AWS credentials"
+        uses: aws-actions/configure-aws-credentials@v2
         with:
-          credentials_json: "${{ env.GKE_SA_KEY }}"
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - id: "get-credentials"
-        uses: "google-github-actions/get-gke-credentials@v1"
-        with:
-          cluster_name: "${{ github.event.inputs.GKE_CLUSTER }}"
-          location: "us-west1-b"
+      - name: Update kube config
+        run: aws eks update-kubeconfig --name $AWS_CLUSTER --region ${{ secrets.AWS_DEFAULT_REGION }}
 
       - name: "Set Test ID"
         run: |

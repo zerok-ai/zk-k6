@@ -15,7 +15,7 @@ podLabels: {}
 
 # nodeSelector -- Node Selector to be applied on all containers
 nodeSelector: {
-  cloud.google.com/gke-nodepool: load-workers
+  alpha.eksctl.io/nodegroup-name: k6
 }
 
 # affinity -- Affinity to be applied on all containers
