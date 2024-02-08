@@ -41,9 +41,6 @@ on:
 env:
   AWS_CLUSTER: ${{ github.event.inputs.AWS_CLUSTER }}
   GKE_SA_KEY: ${{ secrets.GKE_SA_KEY_DEV }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.ACCESS_KEY_ID_AWS }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.SECRET_ACCESS_KEY_AWS }}
-  AWS_DEFAULT_REGION: ${{ secrets.DEFAULT_REGION_AWS }}
 
 jobs:
   print-envs:
@@ -79,12 +76,12 @@ jobs:
       - name: "Configure AWS credentials"
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
+          aws-access-key-id: ${{ secrets.ACCESS_KEY_ID_AWS }}
+          aws-secret-access-key: ${{ secrets.SECRET_ACCESS_KEY_AWS }}
+          aws-region: ${{ secrets.DEFAULT_REGION_AWS }}
 
       - name: Update kube config
-        run: aws eks update-kubeconfig --name $AWS_CLUSTER --region ${{ secrets.AWS_DEFAULT_REGION }}
+        run: aws eks update-kubeconfig --name $AWS_CLUSTER --region ${{ secrets.DEFAULT_REGION_AWS }}
 
       - name: "Set Test ID"
         run: |
